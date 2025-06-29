@@ -30,7 +30,7 @@ const generateTitle = (request: ContentRequest): string => {
     case 'product-description':
       return `${request.productName || request.topic} - Product Description`;
     case 'ad-copy':
-      return `${request.topic} - ${request.platform || 'Ad'} Copy`;
+      return `${request.topic} - Complete ${request.platform || 'Ad'} Campaign Package`;
     case 'social-media':
       return `${request.topic} - ${request.platform || 'Social Media'} Post`;
     default:
@@ -38,7 +38,7 @@ const generateTitle = (request: ContentRequest): string => {
   }
 };
 
-// Fallback content generation (original template system)
+// Fallback content generation (enhanced template system)
 const generateFallbackContent = (request: ContentRequest): GeneratedContent => {
   const title = generateTitle(request);
   
@@ -65,16 +65,7 @@ ${request.benefits ? request.benefits.split(',').map(b => `✓ ${b.trim()}`).joi
       break;
       
     case 'ad-copy':
-      content = `🚀 Discover ${request.topic}!
-
-Transform your approach with our proven solution.
-
-✅ Immediate results
-✅ Expert support  
-✅ Risk-free trial
-
-Ready to get started?
-👆 Click to learn more!`;
+      content = generateDetailedAdCopyFallback(request);
       break;
       
     case 'social-media':
@@ -99,6 +90,169 @@ What's your experience? Share in the comments! 👇
     type: request.type,
     timestamp: new Date()
   };
+};
+
+const generateDetailedAdCopyFallback = (request: ContentRequest): string => {
+  return `# Complete ${request.platform || 'Ad'} Campaign Package: ${request.topic}
+
+## 🎯 CAMPAIGN STRATEGY OVERVIEW
+
+**Target Audience:** ${request.targetAudience || 'Professionals and businesses seeking growth'}
+**Platform:** ${request.platform || 'Google Ads'}
+**Tone:** ${request.tone || 'Professional yet approachable'}
+
+**Key Messaging Strategy:**
+- Focus on immediate value and results
+- Address pain points directly
+- Emphasize unique competitive advantages
+- Create urgency without being pushy
+
+## 📝 PRIMARY AD VARIATIONS
+
+### Ad Variation #1: Problem-Solution Focus
+**Headlines:**
+- "Struggling with ${request.topic}? Here's Your Solution"
+- "Finally! A Better Way to Handle ${request.topic}"
+- "Stop Wasting Time on ${request.topic} - Try This Instead"
+
+**Body Copy:**
+Transform your approach to ${request.topic} with our proven solution. Join thousands of satisfied customers who've already made the switch.
+
+✅ Immediate results
+✅ Expert support included
+✅ Risk-free 30-day trial
+
+**Call-to-Action:** "Get Started Today - Free Trial"
+
+### Ad Variation #2: Benefit-Driven Approach
+**Headlines:**
+- "Boost Your ${request.topic} Results by 300%"
+- "The #1 ${request.topic} Solution Trusted by Professionals"
+- "Unlock Your ${request.topic} Potential in Just 5 Minutes"
+
+**Body Copy:**
+Discover why leading professionals choose our ${request.topic} solution. Advanced features, simple setup, and results you can measure.
+
+🚀 Fast implementation
+🎯 Proven results
+💪 Dedicated support team
+
+**Call-to-Action:** "See Results Now - Start Free"
+
+### Ad Variation #3: Social Proof & Authority
+**Headlines:**
+- "Join 50,000+ Professionals Using This ${request.topic} Tool"
+- "The ${request.topic} Solution Recommended by Industry Experts"
+- "Why Top Companies Choose Us for ${request.topic}"
+
+**Body Copy:**
+Don't just take our word for it. See why industry leaders trust us with their ${request.topic} needs. Award-winning solution with 24/7 support.
+
+⭐ 4.9/5 star rating
+🏆 Industry awards
+📈 Proven ROI
+
+**Call-to-Action:** "Join the Leaders - Try Free"
+
+## 🎨 PLATFORM-SPECIFIC OPTIMIZATIONS
+
+### ${request.platform || 'Google Ads'} Specifications:
+- **Character Limits:** Headlines (30 chars), Descriptions (90 chars)
+- **Ad Extensions:** Sitelinks, Callouts, Structured snippets
+- **Keywords:** Focus on high-intent, commercial keywords
+- **Bidding:** Start with Target CPA, optimize to Target ROAS
+
+### Targeting Recommendations:
+- **Demographics:** Age 25-55, College educated, Household income $50K+
+- **Interests:** Business software, Professional development, Industry publications
+- **Behaviors:** Frequent business tool users, Decision makers, Budget holders
+
+## 🧠 PSYCHOLOGICAL TRIGGERS & PERSUASION TECHNIQUES
+
+**Scarcity:** "Limited time offer" and "While supplies last"
+**Social Proof:** Customer testimonials and usage statistics
+**Authority:** Industry certifications and expert endorsements
+**Reciprocity:** Free trials and valuable content offers
+**Loss Aversion:** "Don't miss out" and "What you're losing by waiting"
+
+## 🔬 A/B TESTING RECOMMENDATIONS
+
+**Test Elements:**
+1. Headlines (emotional vs. rational)
+2. Call-to-action buttons (color, text, placement)
+3. Value propositions (features vs. benefits)
+4. Social proof elements (numbers, testimonials)
+5. Urgency levels (high vs. moderate)
+
+**Success Metrics:**
+- Click-through rate (CTR)
+- Conversion rate
+- Cost per acquisition (CPA)
+- Return on ad spend (ROAS)
+- Quality Score (for Google Ads)
+
+## 🎯 LANDING PAGE ALIGNMENT
+
+**Key Messages to Maintain:**
+- Consistent value proposition
+- Same offer/promotion
+- Matching visual style
+- Clear conversion path
+
+**Optimization Tips:**
+- Mobile-first design
+- Fast loading speed (under 3 seconds)
+- Clear headline above the fold
+- Single, prominent call-to-action
+- Trust signals (testimonials, security badges)
+
+## 💰 BUDGET & PERFORMANCE EXPECTATIONS
+
+**Recommended Budget Allocation:**
+- Testing Phase: $500-1,000/month
+- Scaling Phase: $2,000-5,000/month
+- Optimization Phase: Based on profitable ROAS
+
+**Expected Performance Benchmarks:**
+- CTR: 2-4% (industry average)
+- Conversion Rate: 3-5%
+- CPA: $50-150 (varies by industry)
+- ROAS: 3:1 minimum target
+
+**Scaling Strategies:**
+1. Increase budget on winning ad variations
+2. Expand to similar audiences
+3. Test new platforms with proven creative
+4. Develop lookalike audiences from converters
+
+## 📊 CAMPAIGN MONITORING & OPTIMIZATION
+
+**Daily Checks:**
+- Budget pacing
+- Quality Score changes
+- New negative keywords needed
+
+**Weekly Reviews:**
+- Performance by ad variation
+- Audience segment analysis
+- Competitor activity monitoring
+
+**Monthly Optimizations:**
+- Creative refresh
+- Landing page improvements
+- Audience expansion testing
+- Budget reallocation based on performance
+
+---
+
+**Next Steps:**
+1. Set up tracking and analytics
+2. Create landing pages aligned with ad messaging
+3. Launch with small budget for testing
+4. Monitor performance and optimize based on data
+5. Scale successful campaigns gradually
+
+This comprehensive campaign package provides everything needed for a successful ${request.topic} advertising campaign on ${request.platform || 'Google Ads'}. Implement systematically and optimize based on real performance data.`;
 };
 
 const generateStandardBlog = (request: ContentRequest): string => {

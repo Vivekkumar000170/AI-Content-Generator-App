@@ -27,7 +27,7 @@ export const generateAIContent = async (request: ContentRequest): Promise<string
           content: prompt
         }
       ],
-      max_tokens: 1500,
+      max_tokens: request.type === 'ad-copy' ? 2000 : 1500, // Increased tokens for ad copy
       temperature: request.blogType === 'humanized' ? 0.8 : 0.7,
     });
 
@@ -51,6 +51,17 @@ export const generateAIContent = async (request: ContentRequest): Promise<string
 };
 
 const getSystemPrompt = (request: ContentRequest): string => {
+  if (request.type === 'ad-copy') {
+    return `You are a professional advertising copywriter and marketing strategist with 15+ years of experience creating high-converting ad campaigns. Your expertise includes:
+    - Direct response marketing
+    - Consumer psychology and persuasion techniques
+    - Platform-specific ad optimization (Google Ads, Facebook, Instagram)
+    - A/B testing and conversion optimization
+    - Brand voice development and messaging strategy
+    
+    Create comprehensive, detailed ad copy that includes multiple variations, strategic insights, and actionable recommendations. Always provide thorough explanations and context for your creative choices.`;
+  }
+  
   if (request.type === 'seo-blog' && request.blogType === 'humanized') {
     return `You are a professional content writer who specializes in creating human-like, engaging blog content that ranks well on Google. Your writing style should be:
     - Conversational and personal (use "I", "you", "we")
@@ -119,16 +130,55 @@ const buildPrompt = (request: ContentRequest): string => {
       - Use bullet points for features/benefits`;
 
     case 'ad-copy':
-      return `Create attention-grabbing ad copy for "${request.topic}" on ${request.platform || 'Google Ads'}.
+      return `Create a comprehensive ad campaign package for "${request.topic}" on ${request.platform || 'Google Ads'}.
       
-      Requirements:
+      Campaign Details:
+      - Platform: ${request.platform || 'Google Ads'}
       - Tone: ${request.tone || 'professional'}
-      - Include a compelling headline
-      - Focus on benefits and value proposition
-      - Include a strong call-to-action
-      - Keep it concise and punchy
-      - Make it platform-appropriate
-      - Use persuasive language that converts`;
+      - Target audience: ${request.targetAudience || 'general audience'}
+      
+      Please provide a COMPLETE ad campaign package including:
+      
+      1. **CAMPAIGN STRATEGY OVERVIEW**
+         - Target audience analysis
+         - Key messaging strategy
+         - Competitive positioning
+         - Campaign objectives and KPIs
+      
+      2. **PRIMARY AD VARIATIONS** (Create 3-5 different versions)
+         - Headlines (multiple options for each ad)
+         - Body copy with different angles
+         - Call-to-action variations
+         - Visual/creative direction suggestions
+      
+      3. **PLATFORM-SPECIFIC OPTIMIZATIONS**
+         - Character limits and formatting for ${request.platform || 'Google Ads'}
+         - Recommended ad extensions (if applicable)
+         - Bidding strategy recommendations
+         - Targeting suggestions (demographics, interests, keywords)
+      
+      4. **PSYCHOLOGICAL TRIGGERS & PERSUASION TECHNIQUES**
+         - Explain which psychological principles each ad uses
+         - Pain points addressed
+         - Benefits highlighted
+         - Urgency/scarcity elements
+      
+      5. **A/B TESTING RECOMMENDATIONS**
+         - What elements to test
+         - Success metrics to track
+         - Optimization suggestions
+      
+      6. **LANDING PAGE ALIGNMENT**
+         - Key messages that should be consistent
+         - Conversion optimization tips
+         - User experience considerations
+      
+      7. **BUDGET & PERFORMANCE EXPECTATIONS**
+         - Recommended budget allocation
+         - Expected performance benchmarks
+         - Scaling strategies
+      
+      Make this comprehensive, actionable, and ready for immediate implementation. Include specific examples, detailed explanations, and professional insights throughout.`;
 
     case 'social-media':
       return `Create an engaging social media post about "${request.topic}" for ${request.platform || 'LinkedIn'}.
