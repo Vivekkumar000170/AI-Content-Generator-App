@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, Package, Megaphone, Share2, Copy, RefreshCw, Sparkles, AlertCircle, Bot, Zap, ChevronDown, Image, Download } from 'lucide-react';
+import { FileText, Package, Megaphone, Share2, Copy, RefreshCw, Sparkles, AlertCircle, Bot, Zap, ChevronDown, Image, Download, Palette } from 'lucide-react';
 import { ContentType, ContentRequest, GeneratedContent } from '../types';
 import { generateContent } from '../utils/contentTemplates';
 
@@ -31,6 +31,20 @@ const contentTypes = [
     description: 'Engaging AI-generated posts for Instagram, LinkedIn with images',
     icon: Share2,
     gradient: 'from-purple-500 to-pink-500'
+  },
+  {
+    id: 'poster' as ContentType,
+    title: 'AI Poster',
+    description: 'Professional posters for events, promotions, and announcements',
+    icon: Palette,
+    gradient: 'from-pink-500 to-rose-500'
+  },
+  {
+    id: 'banner' as ContentType,
+    title: 'AI Banner',
+    description: 'Eye-catching banners for websites, social media, and marketing',
+    icon: Image,
+    gradient: 'from-indigo-500 to-purple-500'
   }
 ];
 
@@ -114,6 +128,35 @@ const ContentGenerator = () => {
 
   const renderFormFields = () => {
     const selectedTypeData = contentTypes.find(type => type.id === selectedType);
+    
+    // For poster and banner types, redirect to dedicated generator
+    if (selectedType === 'poster' || selectedType === 'banner') {
+      return (
+        <div className="text-center py-12">
+          <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mx-auto mb-6">
+            <Palette className="w-8 h-8 text-white" />
+          </div>
+          <h3 className="text-xl font-semibold text-white mb-4">
+            Dedicated {selectedType} Generator
+          </h3>
+          <p className="text-gray-400 mb-6 max-w-md mx-auto">
+            {selectedType === 'poster' ? 'Posters' : 'Banners'} have their own specialized generator with advanced design options, templates, and customization features.
+          </p>
+          <button
+            onClick={() => {
+              // Scroll to poster/banner generator section
+              const element = document.getElementById('poster-banner-generator');
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+            className="bg-gradient-to-r from-purple-500 to-pink-600 px-6 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300"
+          >
+            Go to {selectedType} Generator
+          </button>
+        </div>
+      );
+    }
     
     return (
       <div className="space-y-6">
@@ -367,7 +410,7 @@ const ContentGenerator = () => {
                         <div className="flex-1">
                           <h4 className="font-semibold text-white mb-2">{type.title}</h4>
                           <p className="text-sm text-gray-400 leading-relaxed">{type.description}</p>
-                          {(type.id === 'ad-copy' || type.id === 'social-media') && (
+                          {(type.id === 'ad-copy' || type.id === 'social-media' || type.id === 'poster' || type.id === 'banner') && (
                             <div className="flex items-center space-x-1 mt-2">
                               <Image className="w-4 h-4 text-green-400" />
                               <span className="text-xs text-green-400 font-medium">+ AI Image</span>
@@ -395,23 +438,25 @@ const ContentGenerator = () => {
                 </div>
               )}
               
-              <button
-                onClick={handleGenerate}
-                disabled={!formData.topic.trim() || isGenerating}
-                className="w-full mt-8 bg-gradient-to-r from-blue-500 to-purple-600 py-4 px-6 rounded-xl font-semibold text-lg hover:shadow-2xl hover:shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center space-x-3"
-              >
-                {isGenerating ? (
-                  <>
-                    <RefreshCw className="w-6 h-6 animate-spin" />
-                    <span>Generating with AI...</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-6 h-6" />
-                    <span>Generate AI Content{(selectedType === 'ad-copy' || selectedType === 'social-media') ? ' + Image' : ''}</span>
-                  </>
-                )}
-              </button>
+              {selectedType !== 'poster' && selectedType !== 'banner' && (
+                <button
+                  onClick={handleGenerate}
+                  disabled={!formData.topic.trim() || isGenerating}
+                  className="w-full mt-8 bg-gradient-to-r from-blue-500 to-purple-600 py-4 px-6 rounded-xl font-semibold text-lg hover:shadow-2xl hover:shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center space-x-3"
+                >
+                  {isGenerating ? (
+                    <>
+                      <RefreshCw className="w-6 h-6 animate-spin" />
+                      <span>Generating with AI...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-6 h-6" />
+                      <span>Generate AI Content{(selectedType === 'ad-copy' || selectedType === 'social-media') ? ' + Image' : ''}</span>
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </div>
 

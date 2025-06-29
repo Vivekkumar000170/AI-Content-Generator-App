@@ -1,4 +1,4 @@
-export type ContentType = 'seo-blog' | 'product-description' | 'ad-copy' | 'social-media';
+export type ContentType = 'seo-blog' | 'product-description' | 'ad-copy' | 'social-media' | 'poster' | 'banner';
 
 export interface ContentRequest {
   type: ContentType;
@@ -11,6 +11,13 @@ export interface ContentRequest {
   platform?: string;
   tone?: string;
   blogType?: 'ai-written' | 'humanized';
+  // Poster/Banner specific fields
+  size?: string;
+  style?: string;
+  colorScheme?: string;
+  text?: string;
+  subtitle?: string;
+  callToAction?: string;
 }
 
 export interface GeneratedContent {
