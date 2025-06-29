@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, Package, Megaphone, Share2, Copy, RefreshCw, Sparkles, AlertCircle, Bot, Zap, ChevronDown } from 'lucide-react';
+import { FileText, Package, Megaphone, Share2, Copy, RefreshCw, Sparkles, AlertCircle, Bot, Zap, ChevronDown, Image, Download } from 'lucide-react';
 import { ContentType, ContentRequest, GeneratedContent } from '../types';
 import { generateContent } from '../utils/contentTemplates';
 
@@ -21,14 +21,14 @@ const contentTypes = [
   {
     id: 'ad-copy' as ContentType,
     title: 'Ad Copy',
-    description: 'AI-crafted ad copy for Google/Facebook/Instagram',
+    description: 'AI-crafted ad copy for Google/Facebook/Instagram with images',
     icon: Megaphone,
     gradient: 'from-orange-500 to-red-500'
   },
   {
     id: 'social-media' as ContentType,
     title: 'Social Media Post',
-    description: 'Engaging AI-generated posts for Instagram, LinkedIn',
+    description: 'Engaging AI-generated posts for Instagram, LinkedIn with images',
     icon: Share2,
     gradient: 'from-purple-500 to-pink-500'
   }
@@ -90,6 +90,25 @@ const ContentGenerator = () => {
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       console.error('Failed to copy content:', error);
+    }
+  };
+
+  const handleDownloadImage = async () => {
+    if (!generatedContent?.image) return;
+    
+    try {
+      const response = await fetch(generatedContent.image.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${generatedContent.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_image.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Failed to download image:', error);
     }
   };
 
@@ -233,6 +252,15 @@ const ContentGenerator = () => {
                 <option value="urgent">Urgent</option>
               </select>
             </div>
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+              <div className="flex items-center space-x-2 mb-2">
+                <Image className="w-5 h-5 text-blue-400" />
+                <span className="text-blue-400 font-medium">AI Image Generation</span>
+              </div>
+              <p className="text-sm text-gray-300">
+                A custom image will be generated automatically for your ad campaign to enhance visual appeal and engagement.
+              </p>
+            </div>
           </>
         )}
 
@@ -263,6 +291,15 @@ const ContentGenerator = () => {
                 className="w-full px-4 py-4 bg-gray-800/50 border border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-white placeholder-gray-400"
               />
             </div>
+            <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4">
+              <div className="flex items-center space-x-2 mb-2">
+                <Image className="w-5 h-5 text-purple-400" />
+                <span className="text-purple-400 font-medium">AI Image Generation</span>
+              </div>
+              <p className="text-sm text-gray-300">
+                A custom image will be generated automatically for your social media post to maximize engagement and visual impact.
+              </p>
+            </div>
           </>
         )}
       </div>
@@ -283,7 +320,7 @@ const ContentGenerator = () => {
             </span>
           </h2>
           <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-            Choose your content type and let our AI generate professional, engaging content in seconds.
+            Choose your content type and let our AI generate professional, engaging content with custom images in seconds.
           </p>
         </div>
 
@@ -299,7 +336,7 @@ const ContentGenerator = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-white mb-1">AI Engine Status</h3>
-                  <p className="text-sm text-gray-400">OpenAI GPT-3.5 • Ready for content generation</p>
+                  <p className="text-sm text-gray-400">OpenAI GPT-3.5 + DALL-E 3 • Ready for content & image generation</p>
                 </div>
                 <div className="ml-auto">
                   <Zap className="w-6 h-6 text-yellow-400" />
@@ -330,6 +367,12 @@ const ContentGenerator = () => {
                         <div className="flex-1">
                           <h4 className="font-semibold text-white mb-2">{type.title}</h4>
                           <p className="text-sm text-gray-400 leading-relaxed">{type.description}</p>
+                          {(type.id === 'ad-copy' || type.id === 'social-media') && (
+                            <div className="flex items-center space-x-1 mt-2">
+                              <Image className="w-4 h-4 text-green-400" />
+                              <span className="text-xs text-green-400 font-medium">+ AI Image</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </button>
@@ -365,7 +408,7 @@ const ContentGenerator = () => {
                 ) : (
                   <>
                     <Sparkles className="w-6 h-6" />
-                    <span>Generate AI Content</span>
+                    <span>Generate AI Content{(selectedType === 'ad-copy' || selectedType === 'social-media') ? ' + Image' : ''}</span>
                   </>
                 )}
               </button>
@@ -375,42 +418,79 @@ const ContentGenerator = () => {
           {/* Output Section */}
           <div className="space-y-6">
             {generatedContent ? (
-              <div className="bg-gray-800/50 backdrop-blur-xl border border-gray-700 rounded-2xl overflow-hidden">
-                <div className="bg-gradient-to-r from-gray-800 to-gray-900 px-8 py-6 border-b border-gray-700">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Bot className="w-6 h-6 text-blue-400" />
-                      <div>
-                        <h3 className="text-lg font-semibold text-white">AI Generated Content</h3>
-                        <p className="text-sm text-gray-400">
-                          {selectedType === 'seo-blog' && blogType === 'humanized' 
-                            ? 'Humanized for Google Ranking' 
-                            : 'Powered by OpenAI GPT-3.5'
-                          }
-                        </p>
+              <>
+                {/* Generated Image */}
+                {generatedContent.image && (
+                  <div className="bg-gray-800/50 backdrop-blur-xl border border-gray-700 rounded-2xl overflow-hidden">
+                    <div className="bg-gradient-to-r from-gray-800 to-gray-900 px-6 py-4 border-b border-gray-700">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <Image className="w-5 h-5 text-purple-400" />
+                          <div>
+                            <h3 className="text-lg font-semibold text-white">AI Generated Image</h3>
+                            <p className="text-sm text-gray-400">Custom visual for your {selectedType}</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={handleDownloadImage}
+                          className="flex items-center space-x-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-gray-300 hover:text-white transition-all duration-300"
+                        >
+                          <Download className="w-4 h-4" />
+                          <span className="text-sm">Download</span>
+                        </button>
                       </div>
                     </div>
-                    <button
-                      onClick={handleCopy}
-                      className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-                        copied
-                          ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600'
-                      }`}
-                    >
-                      <Copy className="w-4 h-4" />
-                      <span>{copied ? 'Copied!' : 'Copy'}</span>
-                    </button>
+                    <div className="p-6">
+                      <img
+                        src={generatedContent.image.url}
+                        alt={generatedContent.image.prompt}
+                        className="w-full rounded-lg shadow-lg"
+                      />
+                      <p className="text-xs text-gray-500 mt-3">
+                        <strong>Prompt:</strong> {generatedContent.image.prompt}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Generated Content */}
+                <div className="bg-gray-800/50 backdrop-blur-xl border border-gray-700 rounded-2xl overflow-hidden">
+                  <div className="bg-gradient-to-r from-gray-800 to-gray-900 px-8 py-6 border-b border-gray-700">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <Bot className="w-6 h-6 text-blue-400" />
+                        <div>
+                          <h3 className="text-lg font-semibold text-white">AI Generated Content</h3>
+                          <p className="text-sm text-gray-400">
+                            {selectedType === 'seo-blog' && blogType === 'humanized' 
+                              ? 'Humanized for Google Ranking' 
+                              : 'Powered by OpenAI GPT-3.5'
+                            }
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={handleCopy}
+                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+                          copied
+                            ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600'
+                        }`}
+                      >
+                        <Copy className="w-4 h-4" />
+                        <span>{copied ? 'Copied!' : 'Copy'}</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="p-8">
+                    <div className="prose prose-invert max-w-none">
+                      <pre className="whitespace-pre-wrap text-sm text-gray-300 font-sans leading-relaxed">
+                        {generatedContent.content}
+                      </pre>
+                    </div>
                   </div>
                 </div>
-                <div className="p-8">
-                  <div className="prose prose-invert max-w-none">
-                    <pre className="whitespace-pre-wrap text-sm text-gray-300 font-sans leading-relaxed">
-                      {generatedContent.content}
-                    </pre>
-                  </div>
-                </div>
-              </div>
+              </>
             ) : (
               <div className="bg-gray-800/30 border-2 border-dashed border-gray-600 rounded-2xl p-16 text-center">
                 <div className="relative mb-6">
@@ -422,6 +502,7 @@ const ContentGenerator = () => {
                 <h3 className="text-xl font-semibold text-gray-400 mb-3">Ready to Generate AI Content</h3>
                 <p className="text-gray-500 max-w-md mx-auto">
                   Fill in the details and click "Generate AI Content" to create high-quality content 
+                  {(selectedType === 'ad-copy' || selectedType === 'social-media') ? ' with custom images ' : ' '}
                   powered by advanced artificial intelligence.
                 </p>
               </div>

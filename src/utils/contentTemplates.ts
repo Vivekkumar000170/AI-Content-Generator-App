@@ -1,18 +1,29 @@
 import { ContentRequest, GeneratedContent } from '../types';
 import { generateAIContent } from '../services/openai';
+import { generateImage } from '../services/imageGeneration';
 
 export const generateContent = async (request: ContentRequest): Promise<GeneratedContent> => {
   try {
+    // Generate text content
     const content = await generateAIContent(request);
-    
-    // Generate appropriate title based on content type
     const title = generateTitle(request);
+    
+    // Generate image for ad-copy and social-media content types
+    let image;
+    if (request.type === 'ad-copy' || request.type === 'social-media') {
+      try {
+        image = await generateImage(request.type, request.topic, request.platform, request.tone);
+      } catch (imageError) {
+        console.warn('Image generation failed, continuing without image:', imageError);
+      }
+    }
     
     return {
       title,
       content,
       type: request.type,
-      timestamp: new Date()
+      timestamp: new Date(),
+      image
     };
   } catch (error) {
     console.error('Content generation error:', error);
@@ -39,7 +50,7 @@ const generateTitle = (request: ContentRequest): string => {
 };
 
 // Fallback content generation (enhanced template system)
-const generateFallbackContent = (request: ContentRequest): GeneratedContent => {
+const generateFallbackContent = async (request: ContentRequest): Promise<GeneratedContent> => {
   const title = generateTitle(request);
   
   let content = '';
@@ -84,11 +95,23 @@ What's your experience? Share in the comments! 👇
       break;
   }
   
+  // Generate fallback image for ad-copy and social-media
+  let image;
+  if (request.type === 'ad-copy' || request.type === 'social-media') {
+    try {
+      const { generateImage } = await import('../services/imageGeneration');
+      image = await generateImage(request.type, request.topic, request.platform, request.tone);
+    } catch (error) {
+      console.warn('Fallback image generation failed:', error);
+    }
+  }
+  
   return {
     title,
     content,
     type: request.type,
-    timestamp: new Date()
+    timestamp: new Date(),
+    image
   };
 };
 

@@ -18,4 +18,9 @@ export interface GeneratedContent {
   content: string;
   type: ContentType;
   timestamp: Date;
+  image?: {
+    url: string;
+    prompt: string;
+    style: string;
+  };
 }
