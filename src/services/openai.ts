@@ -2,12 +2,17 @@ import OpenAI from 'openai';
 import { ContentRequest } from '../types';
 
 const openai = new OpenAI({
-  apiKey: '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',
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
   dangerouslyAllowBrowser: true
 });
 
 export const generateAIContent = async (request: ContentRequest): Promise<string> => {
   try {
+    // Check if API key is configured
+    if (!import.meta.env.VITE_OPENAI_API_KEY) {
+      throw new Error('OpenAI API key is not configured. Please add VITE_OPENAI_API_KEY to your environment variables.');
+    }
+
     const prompt = buildPrompt(request);
     
     const completion = await openai.chat.completions.create({
@@ -29,6 +34,18 @@ export const generateAIContent = async (request: ContentRequest): Promise<string
     return completion.choices[0]?.message?.content || 'Unable to generate content. Please try again.';
   } catch (error) {
     console.error('OpenAI API Error:', error);
+    
+    // Provide more specific error messages
+    if (error instanceof Error) {
+      if (error.message.includes('429')) {
+        throw new Error('OpenAI API quota exceeded. Please check your plan and billing details.');
+      } else if (error.message.includes('401')) {
+        throw new Error('Invalid OpenAI API key. Please check your API key configuration.');
+      } else if (error.message.includes('API key is not configured')) {
+        throw new Error(error.message);
+      }
+    }
+    
     throw new Error('Failed to generate content. Please check your API key and try again.');
   }
 };
