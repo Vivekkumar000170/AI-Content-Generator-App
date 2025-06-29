@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, Package, Megaphone, Share2, Copy, RefreshCw, Sparkles, AlertCircle, Bot, Zap } from 'lucide-react';
+import { FileText, Package, Megaphone, Share2, Copy, RefreshCw, Sparkles, AlertCircle, Bot, Zap, ChevronDown } from 'lucide-react';
 import { ContentType, ContentRequest, GeneratedContent } from '../types';
 import { generateContent } from '../utils/contentTemplates';
 
@@ -36,6 +36,7 @@ const contentTypes = [
 
 const ContentGenerator = () => {
   const [selectedType, setSelectedType] = useState<ContentType>('seo-blog');
+  const [blogType, setBlogType] = useState<'ai-written' | 'humanized'>('ai-written');
   const [formData, setFormData] = useState<ContentRequest>({
     type: 'seo-blog',
     topic: '',
@@ -70,7 +71,7 @@ const ContentGenerator = () => {
     setError(null);
     
     try {
-      const content = await generateContent(formData);
+      const content = await generateContent({ ...formData, blogType });
       setGeneratedContent(content);
     } catch (error) {
       console.error('Error generating content:', error);
@@ -112,6 +113,28 @@ const ContentGenerator = () => {
 
         {selectedType === 'seo-blog' && (
           <>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-3">
+                Blog Type
+              </label>
+              <div className="relative">
+                <select
+                  value={blogType}
+                  onChange={(e) => setBlogType(e.target.value as 'ai-written' | 'humanized')}
+                  className="w-full px-4 py-4 bg-gray-800/50 border border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-white appearance-none cursor-pointer"
+                >
+                  <option value="ai-written">AI Written Blog</option>
+                  <option value="humanized">Humanized Blog for Google Ranking</option>
+                </select>
+                <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                {blogType === 'humanized' 
+                  ? 'Optimized for better Google ranking with human-like writing patterns'
+                  : 'Standard AI-generated blog content'
+                }
+              </p>
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-3">
                 Target Audience
@@ -359,7 +382,12 @@ const ContentGenerator = () => {
                       <Bot className="w-6 h-6 text-blue-400" />
                       <div>
                         <h3 className="text-lg font-semibold text-white">AI Generated Content</h3>
-                        <p className="text-sm text-gray-400">Powered by OpenAI GPT-3.5</p>
+                        <p className="text-sm text-gray-400">
+                          {selectedType === 'seo-blog' && blogType === 'humanized' 
+                            ? 'Humanized for Google Ranking' 
+                            : 'Powered by OpenAI GPT-3.5'
+                          }
+                        </p>
                       </div>
                     </div>
                     <button

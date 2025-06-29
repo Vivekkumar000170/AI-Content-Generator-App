@@ -15,7 +15,7 @@ export const generateAIContent = async (request: ContentRequest): Promise<string
       messages: [
         {
           role: "system",
-          content: "You are a professional content writer and marketing expert. Create high-quality, engaging content that is well-structured and optimized for the specified purpose. Always maintain a professional yet friendly tone."
+          content: getSystemPrompt(request)
         },
         {
           role: "user",
@@ -23,7 +23,7 @@ export const generateAIContent = async (request: ContentRequest): Promise<string
         }
       ],
       max_tokens: 1500,
-      temperature: 0.7,
+      temperature: request.blogType === 'humanized' ? 0.8 : 0.7,
     });
 
     return completion.choices[0]?.message?.content || 'Unable to generate content. Please try again.';
@@ -33,21 +33,58 @@ export const generateAIContent = async (request: ContentRequest): Promise<string
   }
 };
 
+const getSystemPrompt = (request: ContentRequest): string => {
+  if (request.type === 'seo-blog' && request.blogType === 'humanized') {
+    return `You are a professional content writer who specializes in creating human-like, engaging blog content that ranks well on Google. Your writing style should be:
+    - Conversational and personal (use "I", "you", "we")
+    - Include personal anecdotes and experiences
+    - Use varied sentence lengths and structures
+    - Include rhetorical questions and direct reader engagement
+    - Avoid overly formal or robotic language
+    - Include natural transitions and flow
+    - Use contractions and casual language where appropriate
+    - Add personality and opinion to make it feel authentic
+    - Structure content with natural, human-like headings
+    - Include real-world examples and scenarios`;
+  }
+  
+  return "You are a professional content writer and marketing expert. Create high-quality, engaging content that is well-structured and optimized for the specified purpose. Always maintain a professional yet friendly tone.";
+};
+
 const buildPrompt = (request: ContentRequest): string => {
   switch (request.type) {
     case 'seo-blog':
-      return `Write a comprehensive SEO-optimized blog article about "${request.topic}".
-      
-      Requirements:
-      - Target audience: ${request.targetAudience || 'general audience'}
-      - Include these keywords naturally: ${request.keywords || 'relevant keywords'}
-      - Structure with clear headings (H1, H2, H3)
-      - Include introduction, main content sections, and conclusion
-      - Aim for 800-1200 words
-      - Make it engaging and informative
-      - Include actionable tips and insights
-      
-      Format the response with proper markdown headings and structure.`;
+      if (request.blogType === 'humanized') {
+        return `Write a humanized, conversational blog article about "${request.topic}" that feels like it was written by a real person with experience in this field.
+        
+        Requirements:
+        - Target audience: ${request.targetAudience || 'general audience'}
+        - Include these keywords naturally: ${request.keywords || 'relevant keywords'}
+        - Write in first person where appropriate
+        - Include personal insights, experiences, or anecdotes
+        - Use conversational language and contractions
+        - Ask rhetorical questions to engage readers
+        - Include varied sentence structures (short and long)
+        - Add personality and authentic voice
+        - Structure with natural, engaging headings
+        - Aim for 800-1200 words
+        - Make it feel like advice from a trusted expert
+        
+        The tone should be helpful, authentic, and engaging - like talking to a knowledgeable friend.`;
+      } else {
+        return `Write a comprehensive SEO-optimized blog article about "${request.topic}".
+        
+        Requirements:
+        - Target audience: ${request.targetAudience || 'general audience'}
+        - Include these keywords naturally: ${request.keywords || 'relevant keywords'}
+        - Structure with clear headings (H1, H2, H3)
+        - Include introduction, main content sections, and conclusion
+        - Aim for 800-1200 words
+        - Make it engaging and informative
+        - Include actionable tips and insights
+        
+        Format the response with proper markdown headings and structure.`;
+      }
 
     case 'product-description':
       return `Write a compelling product description for "${request.productName || request.topic}".

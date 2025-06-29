@@ -10,6 +10,7 @@ export interface ContentRequest {
   benefits?: string;
   platform?: string;
   tone?: string;
+  blogType?: 'ai-written' | 'humanized';
 }
 
 export interface GeneratedContent {
