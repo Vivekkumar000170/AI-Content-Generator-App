@@ -15,6 +15,7 @@ export const generateContent = async (request: ContentRequest): Promise<Generate
         image = await generateImage(request.type, request.topic, request.platform, request.tone);
       } catch (imageError) {
         console.warn('Image generation failed, continuing without image:', imageError);
+        // Don't throw error, just continue without image
       }
     }
     
@@ -28,11 +29,12 @@ export const generateContent = async (request: ContentRequest): Promise<Generate
   } catch (error) {
     console.error('Content generation error:', error);
     
-    // Fallback to template-based generation if API fails
+    // Fallback to template-based generation
     return generateFallbackContent(request);
   }
 };
 
+// Generate appropriate title based on content type
 const generateTitle = (request: ContentRequest): string => {
   switch (request.type) {
     case 'seo-blog':
@@ -44,6 +46,10 @@ const generateTitle = (request: ContentRequest): string => {
       return `${request.topic} - Complete ${request.platform || 'Ad'} Campaign Package`;
     case 'social-media':
       return `${request.topic} - ${request.platform || 'Social Media'} Post`;
+    case 'poster':
+      return `${request.topic} - AI Generated Poster`;
+    case 'banner':
+      return `${request.topic} - AI Generated Banner`;
     default:
       return `${request.topic} - Generated Content`;
   }
@@ -99,10 +105,10 @@ What's your experience? Share in the comments! 👇
   let image;
   if (request.type === 'ad-copy' || request.type === 'social-media') {
     try {
-      const { generateImage } = await import('../services/imageGeneration');
       image = await generateImage(request.type, request.topic, request.platform, request.tone);
     } catch (error) {
       console.warn('Fallback image generation failed:', error);
+      // Continue without image
     }
   }
   

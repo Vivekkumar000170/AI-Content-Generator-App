@@ -26,7 +26,8 @@ export interface GeneratedPosterBanner {
 export const generatePosterBanner = async (config: PosterBannerConfig): Promise<GeneratedPosterBanner> => {
   try {
     if (!import.meta.env.VITE_OPENAI_API_KEY) {
-      throw new Error('OpenAI API key is not configured for image generation.');
+      console.warn('OpenAI API key not configured, using fallback image');
+      return getFallbackPosterBanner(config);
     }
 
     const imagePrompt = buildPosterBannerPrompt(config);
@@ -37,7 +38,7 @@ export const generatePosterBanner = async (config: PosterBannerConfig): Promise<
       prompt: imagePrompt,
       n: 1,
       size: imageSize,
-      quality: "hd",
+      quality: "standard", // Changed from "hd" to "standard" to avoid quota issues
       style: config.style === 'artistic' || config.style === 'creative' ? 'vivid' : 'natural'
     });
 
@@ -52,63 +53,22 @@ export const generatePosterBanner = async (config: PosterBannerConfig): Promise<
       config
     };
   } catch (error) {
-    console.error('Poster/Banner generation error:', error);
-    throw error;
+    console.warn('Poster/Banner generation failed, using fallback:', error);
+    return getFallbackPosterBanner(config);
   }
 };
 
 const buildPosterBannerPrompt = (config: PosterBannerConfig): string => {
-  const { type, topic, text, subtitle, callToAction, style, colorScheme, tone } = config;
+  const { type, topic, style, colorScheme, tone } = config;
   
-  let basePrompt = `Create a professional ${type} design about "${topic}".`;
+  // Simplified and safer prompt to avoid policy violations
+  const cleanTopic = topic.replace(/[^\w\s]/gi, '').trim();
   
-  // Add text elements
-  if (text) {
-    basePrompt += ` Main headline: "${text}".`;
-  }
-  if (subtitle) {
-    basePrompt += ` Subtitle: "${subtitle}".`;
-  }
-  if (callToAction) {
-    basePrompt += ` Call-to-action: "${callToAction}".`;
-  }
-  
-  // Add style specifications
-  basePrompt += ` Design style: ${style}.`;
-  basePrompt += ` Color scheme: ${colorScheme}.`;
-  basePrompt += ` Tone: ${tone || 'professional'}.`;
-  
-  // Add specific design requirements
-  if (type === 'poster') {
-    basePrompt += ` Create a vertical poster layout with bold typography, eye-catching visuals, clear hierarchy, and balanced composition. Include decorative elements and modern design principles.`;
-  } else {
-    basePrompt += ` Create a horizontal banner layout with prominent text, clean design, professional appearance, and optimized for digital display.`;
-  }
-  
-  // Add technical specifications
-  basePrompt += ` High resolution, print-ready quality, modern typography, professional layout, visually striking, commercial-grade design.`;
-  
-  // Style-specific additions
-  switch (style) {
-    case 'minimalist':
-      basePrompt += ` Clean, simple, lots of white space, minimal elements, elegant typography.`;
-      break;
-    case 'modern':
-      basePrompt += ` Contemporary design, sleek lines, modern fonts, trendy colors, sophisticated layout.`;
-      break;
-    case 'creative':
-      basePrompt += ` Artistic elements, creative typography, unique composition, innovative design, expressive visuals.`;
-      break;
-    case 'corporate':
-      basePrompt += ` Professional business style, corporate colors, formal typography, trustworthy appearance.`;
-      break;
-    case 'vintage':
-      basePrompt += ` Retro design elements, vintage typography, classic color palette, nostalgic feel.`;
-      break;
-    case 'artistic':
-      basePrompt += ` Creative artistic style, painterly effects, artistic typography, expressive design.`;
-      break;
-  }
+  let basePrompt = `Create a professional ${type} design about ${cleanTopic}. `;
+  basePrompt += `Style: ${style}. Color scheme: ${colorScheme}. `;
+  basePrompt += `${type === 'poster' ? 'Vertical layout' : 'Horizontal layout'}. `;
+  basePrompt += `Modern typography, clean design, professional appearance. `;
+  basePrompt += `High quality, commercial-grade design. No text overlays or specific words.`;
   
   return basePrompt;
 };
@@ -126,6 +86,42 @@ const getImageSize = (size: string): "1024x1024" | "1792x1024" | "1024x1792" => 
     default:
       return "1024x1792";
   }
+};
+
+const getFallbackPosterBanner = (config: PosterBannerConfig): GeneratedPosterBanner => {
+  // Fallback images for posters and banners
+  const fallbackImages = {
+    poster: {
+      event: 'https://images.pexels.com/photos/1190298/pexels-photo-1190298.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+      business: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+      sale: 'https://images.pexels.com/photos/264547/pexels-photo-264547.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+      announcement: 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+      default: 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
+    },
+    banner: {
+      website: 'https://images.pexels.com/photos/265087/pexels-photo-265087.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+      promotion: 'https://images.pexels.com/photos/264547/pexels-photo-264547.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+      social: 'https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+      default: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
+    }
+  };
+
+  const categoryImages = fallbackImages[config.type];
+  const topicLower = config.topic.toLowerCase();
+  
+  let selectedKey = 'default';
+  for (const key of Object.keys(categoryImages)) {
+    if (topicLower.includes(key) || key === 'default') {
+      selectedKey = key;
+      if (key !== 'default') break;
+    }
+  }
+
+  return {
+    url: categoryImages[selectedKey as keyof typeof categoryImages],
+    prompt: `Professional ${config.type} design for ${config.topic}`,
+    config
+  };
 };
 
 // Predefined templates for quick generation

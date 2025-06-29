@@ -20,7 +20,8 @@ export const generateImage = async (
 ): Promise<GeneratedImage> => {
   try {
     if (!import.meta.env.VITE_OPENAI_API_KEY) {
-      throw new Error('OpenAI API key is not configured for image generation.');
+      console.warn('OpenAI API key not configured, using fallback image');
+      return getFallbackImage(contentType, topic);
     }
 
     const imagePrompt = buildImagePrompt(contentType, topic, platform, tone);
@@ -45,9 +46,9 @@ export const generateImage = async (
       style: getImageStyle(contentType, tone)
     };
   } catch (error) {
-    console.error('Image generation error:', error);
+    console.warn('Image generation failed, using fallback:', error);
     
-    // Return fallback image from Pexels
+    // Always return fallback image instead of throwing error
     return getFallbackImage(contentType, topic);
   }
 };
@@ -58,29 +59,18 @@ const buildImagePrompt = (
   platform?: string,
   tone?: string
 ): string => {
-  const baseStyle = "professional, high-quality, modern design";
+  // Simplified and safer prompts to avoid DALL-E policy violations
+  const cleanTopic = topic.replace(/[^\w\s]/gi, '').trim();
   
   switch (contentType) {
     case 'ad-copy':
-      return `Create a ${tone || 'professional'} advertising image for ${topic}. 
-              Style: ${baseStyle}, commercial photography, clean composition, 
-              eye-catching visuals, suitable for ${platform || 'digital advertising'}.
-              Include subtle branding elements, attractive color scheme, 
-              and compelling visual hierarchy. No text overlays.`;
+      return `A professional marketing image featuring ${cleanTopic}. Modern, clean design with vibrant colors. Commercial photography style, high quality, professional lighting. No text or logos.`;
               
     case 'social-media':
-      const platformStyle = platform === 'Instagram' 
-        ? 'vibrant, engaging, lifestyle-focused' 
-        : 'professional, business-oriented, clean';
-        
-      return `Create a ${platformStyle} social media image about ${topic}. 
-              Style: ${baseStyle}, ${platformStyle}, optimized for ${platform || 'social media'}.
-              Engaging composition, modern aesthetic, shareable quality.
-              Perfect for social media engagement. No text overlays.`;
+      return `A social media friendly image about ${cleanTopic}. Bright, engaging, modern aesthetic. Clean composition, attractive colors, optimized for ${platform || 'social media'}. No text overlays.`;
               
     default:
-      return `Create a professional image related to ${topic}. 
-              Style: ${baseStyle}, clean and modern aesthetic.`;
+      return `A professional image related to ${cleanTopic}. Clean, modern, high quality.`;
   }
 };
 
@@ -97,24 +87,41 @@ const getFallbackImage = (contentType: ContentType, topic: string): GeneratedIma
       business: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
       technology: 'https://images.pexels.com/photos/373543/pexels-photo-373543.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
       marketing: 'https://images.pexels.com/photos/265087/pexels-photo-265087.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+      finance: 'https://images.pexels.com/photos/259027/pexels-photo-259027.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+      health: 'https://images.pexels.com/photos/40568/medical-appointment-doctor-healthcare-40568.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+      education: 'https://images.pexels.com/photos/301926/pexels-photo-301926.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+      food: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+      travel: 'https://images.pexels.com/photos/346885/pexels-photo-346885.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
       default: 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
     },
     'social-media': {
       business: 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
       lifestyle: 'https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
       technology: 'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+      fitness: 'https://images.pexels.com/photos/841130/pexels-photo-841130.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+      food: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+      travel: 'https://images.pexels.com/photos/1285625/pexels-photo-1285625.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+      education: 'https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
       default: 'https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
     }
   };
 
   const categoryImages = fallbackImages[contentType as keyof typeof fallbackImages];
-  const topicKey = Object.keys(categoryImages).find(key => 
-    topic.toLowerCase().includes(key)
-  ) || 'default';
+  
+  // Smart topic matching
+  const topicLower = topic.toLowerCase();
+  let selectedKey = 'default';
+  
+  for (const key of Object.keys(categoryImages)) {
+    if (topicLower.includes(key) || key === 'default') {
+      selectedKey = key;
+      if (key !== 'default') break; // Use specific match if found
+    }
+  }
   
   return {
-    url: categoryImages[topicKey as keyof typeof categoryImages],
-    prompt: `Fallback image for ${topic}`,
+    url: categoryImages[selectedKey as keyof typeof categoryImages],
+    prompt: `Professional stock image for ${topic}`,
     style: 'natural'
   };
 };
