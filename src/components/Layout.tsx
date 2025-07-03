@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Bot, Network, Brain, Cpu, Menu, X, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -15,8 +15,26 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const isActive = (path: string) => location.pathname === path;
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    if (isUserMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isUserMenuOpen]);
 
   const handleGetStarted = () => {
     if (isAuthenticated) {
@@ -28,6 +46,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     } else {
       setIsAuthModalOpen(true);
     }
+  };
+
+  const handleUserMenuToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsUserMenuOpen(!isUserMenuOpen);
   };
 
   return (
@@ -106,9 +129,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               
               {/* User Menu or Get Started Button */}
               {isAuthenticated ? (
-                <div className="relative">
+                <div className="relative" ref={userMenuRef}>
                   <button
-                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    onClick={handleUserMenuToggle}
                     className="flex items-center space-x-2 bg-gray-800/30 backdrop-blur-2xl border border-white/10 px-4 py-2 rounded-lg hover:bg-gray-700/30 transition-all duration-300 hover:scale-105"
                   >
                     <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
@@ -117,11 +140,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <span className="text-gray-300">{user?.name}</span>
                   </button>
                   
-                  {/* User Dropdown */}
+                  {/* User Dropdown with Dark Blur Background */}
                   {isUserMenuOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-80 z-50">
-                      <UserDashboard />
-                    </div>
+                    <>
+                      {/* Dark blur backdrop */}
+                      <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"></div>
+                      
+                      {/* Dropdown menu */}
+                      <div className="absolute right-0 top-full mt-2 z-50">
+                        <UserDashboard />
+                      </div>
+                    </>
                   )}
                 </div>
               ) : (
@@ -279,14 +308,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         onClose={() => setIsAuthModalOpen(false)}
         initialMode="register"
       />
-
-      {/* Click outside to close user menu */}
-      {isUserMenuOpen && (
-        <div 
-          className="fixed inset-0 z-40" 
-          onClick={() => setIsUserMenuOpen(false)}
-        ></div>
-      )}
     </div>
   );
 };
