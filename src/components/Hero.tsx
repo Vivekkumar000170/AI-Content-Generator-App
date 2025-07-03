@@ -34,7 +34,7 @@ const Hero = () => {
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center max-w-4xl mx-auto">
             {/* Badge */}
-            <div className="inline-flex items-center space-x-2 bg-blue-500/10 border border-blue-500/20 rounded-full px-4 py-2 mb-8">
+            <div className="inline-flex items-center space-x-2 bg-blue-500/10 border border-blue-500/20 rounded-full px-4 py-2 mb-8 backdrop-blur-xl">
               <Sparkles className="w-4 h-4 text-blue-400" />
               <span className="text-blue-400 text-sm font-medium">AI-Powered Content Generation</span>
             </div>
@@ -61,14 +61,14 @@ const Hero = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
               <button 
                 onClick={handleStartCreating}
-                className="group bg-gradient-to-r from-blue-500 to-purple-600 px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 flex items-center space-x-2"
+                className="group bg-gradient-to-r from-blue-500 to-purple-600 px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 flex items-center space-x-2 hover:scale-105 backdrop-blur-xl border border-white/10"
               >
                 <span>{isAuthenticated ? 'Start Creating' : 'Start Free Trial'}</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
               <button 
                 onClick={handleWatchDemo}
-                className="group bg-gray-800/50 border border-gray-700 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-700/50 transition-all duration-300 flex items-center space-x-2"
+                className="group bg-gray-800/30 border border-gray-700 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-700/30 transition-all duration-300 flex items-center space-x-2 hover:scale-105 backdrop-blur-xl hover:border-white/20"
               >
                 <Play className="w-5 h-5" />
                 <span>Watch Demo</span>

@@ -40,34 +40,39 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white overflow-x-hidden">
-      {/* Enhanced Animated Background with Glass Effect */}
+      {/* Enhanced Dark Blur Background */}
       <div className="fixed inset-0 z-0">
-        {/* Base gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-blue-900/20 to-purple-900/20"></div>
+        {/* Dark base with enhanced blur */}
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900"></div>
         
-        {/* Glass morphism overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 backdrop-blur-3xl"></div>
+        {/* Multiple blur layers for depth */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-blue-900/10 to-purple-900/10 backdrop-blur-3xl"></div>
+        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.02] to-transparent backdrop-blur-2xl"></div>
         
-        {/* Radial gradients for depth */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.15),transparent_50%)]"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(147,51,234,0.15),transparent_50%)]"></div>
+        {/* Enhanced radial gradients */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(59,130,246,0.08),transparent_50%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_75%,rgba(147,51,234,0.08),transparent_50%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.04),transparent_60%)]"></div>
         
-        {/* Floating glass orbs */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse backdrop-blur-xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000 backdrop-blur-xl"></div>
-        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-cyan-500/5 rounded-full blur-2xl animate-pulse delay-2000 backdrop-blur-xl"></div>
+        {/* Floating glass orbs with enhanced blur */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse backdrop-blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse delay-1000 backdrop-blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-cyan-500/3 rounded-full blur-2xl animate-pulse delay-2000 backdrop-blur-3xl"></div>
         
-        {/* Subtle grid pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+        {/* Subtle noise texture */}
+        <div className="absolute inset-0 opacity-[0.015] bg-[url('data:image/svg+xml,%3Csvg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E')]"></div>
+        
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
       </div>
 
-      {/* Header with Glass Effect */}
-      <header className="relative z-10 bg-gray-900/40 backdrop-blur-2xl border-b border-white/10 shadow-lg">
+      {/* Header with Enhanced Glass Effect */}
+      <header className="relative z-10 bg-gray-900/20 backdrop-blur-3xl border-b border-white/5 shadow-2xl">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center space-x-3 group">
               <div className="relative">
-                <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-3 rounded-xl shadow-lg group-hover:shadow-blue-500/25 transition-all duration-300">
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-3 rounded-xl shadow-lg group-hover:shadow-blue-500/25 transition-all duration-300 backdrop-blur-xl">
                   <Bot className="w-8 h-8 text-white" />
                 </div>
                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full animate-ping"></div>
@@ -113,7 +118,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <div className="relative">
                   <button
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center space-x-2 bg-gray-800/50 backdrop-blur-xl hover:bg-gray-700/50 px-4 py-2 rounded-xl border border-white/10 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                    className="flex items-center space-x-2 bg-gray-800/30 backdrop-blur-2xl hover:bg-gray-700/30 px-4 py-2 rounded-xl border border-white/10 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:border-white/20"
                   >
                     <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                       <span className="text-white text-sm font-semibold">
@@ -134,13 +139,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <div className="flex items-center space-x-4">
                   <button
                     onClick={handleSignIn}
-                    className="text-gray-300 hover:text-blue-400 transition-all duration-300 hover:scale-105"
+                    className="text-gray-300 hover:text-blue-400 transition-all duration-300 hover:scale-105 px-3 py-2 rounded-lg hover:bg-white/5 backdrop-blur-xl"
                   >
                     Sign In
                   </button>
                   <button 
                     onClick={handleGetStarted}
-                    className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-2 rounded-xl font-medium hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 hover:scale-105 backdrop-blur-xl"
+                    className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-2 rounded-xl font-medium hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 hover:scale-105 backdrop-blur-xl border border-white/10"
                   >
                     Start Free Trial
                   </button>
@@ -151,7 +156,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-gray-300 hover:text-white bg-gray-800/50 backdrop-blur-xl rounded-lg border border-white/10 transition-all duration-300"
+              className="md:hidden p-2 text-gray-300 hover:text-white bg-gray-800/30 backdrop-blur-2xl rounded-lg border border-white/10 transition-all duration-300 hover:scale-105"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -159,32 +164,32 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
           {/* Mobile Navigation */}
           {isMobileMenuOpen && (
-            <div className="md:hidden mt-4 pb-4 border-t border-white/10 pt-4 bg-gray-800/30 backdrop-blur-xl rounded-xl">
+            <div className="md:hidden mt-4 pb-4 border-t border-white/10 pt-4 bg-gray-800/20 backdrop-blur-2xl rounded-xl border border-white/5">
               <nav className="flex flex-col space-y-4">
                 <Link 
                   to="/solutions" 
-                  className={`transition-colors ${isActive('/solutions') ? 'text-blue-400' : 'text-gray-300 hover:text-blue-400'}`}
+                  className={`transition-colors px-3 py-2 rounded-lg hover:bg-white/5 ${isActive('/solutions') ? 'text-blue-400' : 'text-gray-300 hover:text-blue-400'}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Solutions
                 </Link>
                 <Link 
                   to="/features" 
-                  className={`transition-colors ${isActive('/features') ? 'text-blue-400' : 'text-gray-300 hover:text-blue-400'}`}
+                  className={`transition-colors px-3 py-2 rounded-lg hover:bg-white/5 ${isActive('/features') ? 'text-blue-400' : 'text-gray-300 hover:text-blue-400'}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Features
                 </Link>
                 <Link 
                   to="/pricing" 
-                  className={`transition-colors ${isActive('/pricing') ? 'text-blue-400' : 'text-gray-300 hover:text-blue-400'}`}
+                  className={`transition-colors px-3 py-2 rounded-lg hover:bg-white/5 ${isActive('/pricing') ? 'text-blue-400' : 'text-gray-300 hover:text-blue-400'}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Pricing
                 </Link>
                 <Link 
                   to="/about" 
-                  className={`transition-colors ${isActive('/about') ? 'text-blue-400' : 'text-gray-300 hover:text-blue-400'}`}
+                  className={`transition-colors px-3 py-2 rounded-lg hover:bg-white/5 ${isActive('/about') ? 'text-blue-400' : 'text-gray-300 hover:text-blue-400'}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   About
@@ -202,7 +207,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         handleSignIn();
                         setIsMobileMenuOpen(false);
                       }}
-                      className="text-left text-gray-300 hover:text-blue-400 transition-colors p-2"
+                      className="text-left text-gray-300 hover:text-blue-400 transition-colors p-2 rounded-lg hover:bg-white/5"
                     >
                       Sign In
                     </button>
@@ -211,7 +216,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         handleGetStarted();
                         setIsMobileMenuOpen(false);
                       }}
-                      className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-3 rounded-xl font-medium hover:shadow-lg hover:shadow-blue-500/25 transition-all text-center backdrop-blur-xl"
+                      className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-3 rounded-xl font-medium hover:shadow-lg hover:shadow-blue-500/25 transition-all text-center backdrop-blur-xl border border-white/10"
                     >
                       Start Free Trial
                     </button>
@@ -236,13 +241,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {children}
       </main>
 
-      {/* Footer with Glass Effect */}
-      <footer className="relative z-10 bg-gray-900/40 backdrop-blur-2xl border-t border-white/10 mt-20">
+      {/* Footer with Enhanced Glass Effect */}
+      <footer className="relative z-10 bg-gray-900/20 backdrop-blur-3xl border-t border-white/5 mt-20">
         <div className="max-w-7xl mx-auto px-4 py-12">
           <div className="grid md:grid-cols-4 gap-8">
             <div className="col-span-2">
               <div className="flex items-center space-x-3 mb-6">
-                <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-xl shadow-lg">
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-xl shadow-lg backdrop-blur-xl">
                   <Bot className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
@@ -254,13 +259,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 that drives engagement and delivers measurable results.
               </p>
               <div className="flex space-x-4">
-                <button className="w-10 h-10 bg-gray-800/50 backdrop-blur-xl rounded-lg flex items-center justify-center hover:bg-blue-600/50 transition-all duration-300 border border-white/10 hover:scale-110">
+                <button className="w-10 h-10 bg-gray-800/30 backdrop-blur-2xl rounded-lg flex items-center justify-center hover:bg-blue-600/30 transition-all duration-300 border border-white/10 hover:scale-110 hover:border-white/20">
                   <Network className="w-5 h-5" />
                 </button>
-                <button className="w-10 h-10 bg-gray-800/50 backdrop-blur-xl rounded-lg flex items-center justify-center hover:bg-blue-600/50 transition-all duration-300 border border-white/10 hover:scale-110">
+                <button className="w-10 h-10 bg-gray-800/30 backdrop-blur-2xl rounded-lg flex items-center justify-center hover:bg-blue-600/30 transition-all duration-300 border border-white/10 hover:scale-110 hover:border-white/20">
                   <Brain className="w-5 h-5" />
                 </button>
-                <button className="w-10 h-10 bg-gray-800/50 backdrop-blur-xl rounded-lg flex items-center justify-center hover:bg-blue-600/50 transition-all duration-300 border border-white/10 hover:scale-110">
+                <button className="w-10 h-10 bg-gray-800/30 backdrop-blur-2xl rounded-lg flex items-center justify-center hover:bg-blue-600/30 transition-all duration-300 border border-white/10 hover:scale-110 hover:border-white/20">
                   <Cpu className="w-5 h-5" />
                 </button>
               </div>
@@ -269,20 +274,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div>
               <h4 className="text-lg font-semibold mb-4 text-white">Solutions</h4>
               <ul className="space-y-3 text-gray-400">
-                <li><Link to="/solutions" className="hover:text-blue-400 transition-colors">SEO Content</Link></li>
-                <li><Link to="/solutions" className="hover:text-blue-400 transition-colors">Product Descriptions</Link></li>
-                <li><Link to="/solutions" className="hover:text-blue-400 transition-colors">Ad Copy</Link></li>
-                <li><Link to="/solutions" className="hover:text-blue-400 transition-colors">Social Media</Link></li>
+                <li><Link to="/solutions" className="hover:text-blue-400 transition-colors hover:underline">SEO Content</Link></li>
+                <li><Link to="/solutions" className="hover:text-blue-400 transition-colors hover:underline">Product Descriptions</Link></li>
+                <li><Link to="/solutions" className="hover:text-blue-400 transition-colors hover:underline">Ad Copy</Link></li>
+                <li><Link to="/solutions" className="hover:text-blue-400 transition-colors hover:underline">Social Media</Link></li>
               </ul>
             </div>
             
             <div>
               <h4 className="text-lg font-semibold mb-4 text-white">Company</h4>
               <ul className="space-y-3 text-gray-400">
-                <li><Link to="/about" className="hover:text-blue-400 transition-colors">About Us</Link></li>
-                <li><Link to="/about" className="hover:text-blue-400 transition-colors">Careers</Link></li>
-                <li><Link to="/about" className="hover:text-blue-400 transition-colors">Contact</Link></li>
-                <li><Link to="/about" className="hover:text-blue-400 transition-colors">Support</Link></li>
+                <li><Link to="/about" className="hover:text-blue-400 transition-colors hover:underline">About Us</Link></li>
+                <li><Link to="/about" className="hover:text-blue-400 transition-colors hover:underline">Careers</Link></li>
+                <li><Link to="/about" className="hover:text-blue-400 transition-colors hover:underline">Contact</Link></li>
+                <li><Link to="/about" className="hover:text-blue-400 transition-colors hover:underline">Support</Link></li>
               </ul>
             </div>
           </div>
@@ -292,8 +297,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               © 2025 NextMind AI. All rights reserved. Powered by advanced AI technology.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <a href="#" className="text-gray-400 hover:text-blue-400 text-sm transition-colors">Privacy Policy</a>
-              <a href="#" className="text-gray-400 hover:text-blue-400 text-sm transition-colors">Terms of Service</a>
+              <a href="#" className="text-gray-400 hover:text-blue-400 text-sm transition-colors hover:underline">Privacy Policy</a>
+              <a href="#" className="text-gray-400 hover:text-blue-400 text-sm transition-colors hover:underline">Terms of Service</a>
             </div>
           </div>
         </div>

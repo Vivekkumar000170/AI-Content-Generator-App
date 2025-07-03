@@ -127,17 +127,17 @@ const AuthModal: React.FC<AuthModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Enhanced Backdrop with Glass Effect */}
+      {/* Enhanced Dark Blur Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
+        className="absolute inset-0 bg-black/70 backdrop-blur-md animate-in fade-in duration-200"
         onClick={onClose}
       ></div>
       
-      {/* Modal Content with Glass Morphism */}
+      {/* Modal Content with Enhanced Glass Morphism */}
       <div className="relative z-10 w-full max-w-md animate-in zoom-in-95 duration-200">
-        <div className="bg-gray-900/80 backdrop-blur-2xl rounded-2xl overflow-hidden border border-white/20 shadow-2xl">
+        <div className="bg-gray-900/60 backdrop-blur-3xl rounded-2xl overflow-hidden border border-white/20 shadow-2xl">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-white/10 bg-gray-800/30 backdrop-blur-xl">
+          <div className="flex items-center justify-between p-6 border-b border-white/10 bg-gray-800/20 backdrop-blur-2xl">
             <div>
               <h3 className="text-xl font-semibold text-white">
                 {mode === 'login' ? 'Welcome Back' : 'Start Your Free Trial'}
@@ -151,7 +151,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
             </div>
             <button
               onClick={onClose}
-              className="w-10 h-10 bg-gray-700/50 backdrop-blur-xl hover:bg-gray-600/50 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105 border border-white/10"
+              className="w-10 h-10 bg-gray-700/30 backdrop-blur-2xl hover:bg-gray-600/30 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105 border border-white/10 hover:border-white/20"
               aria-label="Close modal"
             >
               <X className="w-5 h-5 text-gray-300 hover:text-white" />
@@ -161,7 +161,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
           {/* Form */}
           <div className="p-6">
             {error && (
-              <div className="mb-4 p-3 bg-red-500/10 backdrop-blur-xl border border-red-500/20 rounded-lg">
+              <div className="mb-4 p-3 bg-red-500/10 backdrop-blur-2xl border border-red-500/20 rounded-lg">
                 <div className="flex items-center space-x-2">
                   <AlertCircle className="w-4 h-4 text-red-400" />
                   <p className="text-sm text-red-400">{error}</p>
@@ -170,7 +170,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
             )}
 
             {success && (
-              <div className="mb-4 p-3 bg-green-500/10 backdrop-blur-xl border border-green-500/20 rounded-lg">
+              <div className="mb-4 p-3 bg-green-500/10 backdrop-blur-2xl border border-green-500/20 rounded-lg">
                 <div className="flex items-center space-x-2">
                   <CheckCircle className="w-4 h-4 text-green-400" />
                   <p className="text-sm text-green-400">{success}</p>
@@ -191,7 +191,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
                       placeholder="Enter your full name"
-                      className="w-full pl-10 pr-4 py-3 bg-gray-800/50 backdrop-blur-xl border border-white/10 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-white placeholder-gray-400"
+                      className="w-full pl-10 pr-4 py-3 bg-gray-800/30 backdrop-blur-2xl border border-white/10 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-white placeholder-gray-400"
                       required
                     />
                   </div>
@@ -209,7 +209,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     placeholder="Enter your email"
-                    className="w-full pl-10 pr-4 py-3 bg-gray-800/50 backdrop-blur-xl border border-white/10 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-white placeholder-gray-400"
+                    className="w-full pl-10 pr-4 py-3 bg-gray-800/30 backdrop-blur-2xl border border-white/10 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-white placeholder-gray-400"
                     required
                   />
                 </div>
@@ -226,7 +226,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                     value={formData.password}
                     onChange={(e) => handleInputChange('password', e.target.value)}
                     placeholder="Enter your password"
-                    className="w-full pl-10 pr-12 py-3 bg-gray-800/50 backdrop-blur-xl border border-white/10 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-white placeholder-gray-400"
+                    className="w-full pl-10 pr-12 py-3 bg-gray-800/30 backdrop-blur-2xl border border-white/10 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-white placeholder-gray-400"
                     required
                     minLength={6}
                   />
@@ -253,7 +253,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                   <select
                     value={formData.plan}
                     onChange={(e) => handleInputChange('plan', e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-800/50 backdrop-blur-xl border border-white/10 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-white"
+                    className="w-full px-4 py-3 bg-gray-800/30 backdrop-blur-2xl border border-white/10 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-white"
                   >
                     <option value="starter">Starter - $9/month (1,000 words)</option>
                     <option value="professional">Professional - $29/month (10,000 words)</option>
@@ -268,7 +268,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 py-3 px-4 rounded-lg font-semibold text-white hover:shadow-lg hover:shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:scale-105 backdrop-blur-xl"
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 py-3 px-4 rounded-lg font-semibold text-white hover:shadow-lg hover:shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:scale-105 backdrop-blur-xl border border-white/10"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center space-x-2">
@@ -287,7 +287,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                 <button
                   onClick={handleDemoLogin}
                   disabled={isLoading}
-                  className="w-full bg-gray-700/50 backdrop-blur-xl hover:bg-gray-600/50 py-3 px-4 rounded-lg font-medium text-gray-300 hover:text-white transition-all duration-300 disabled:opacity-50 border border-white/10 hover:scale-105"
+                  className="w-full bg-gray-700/30 backdrop-blur-2xl hover:bg-gray-600/30 py-3 px-4 rounded-lg font-medium text-gray-300 hover:text-white transition-all duration-300 disabled:opacity-50 border border-white/10 hover:scale-105 hover:border-white/20"
                 >
                   Try Demo Account
                 </button>
