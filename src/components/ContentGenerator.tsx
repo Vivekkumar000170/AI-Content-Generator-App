@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { FileText, Package, Megaphone, Share2, Copy, RefreshCw, Sparkles, AlertCircle, Bot, Zap, ChevronDown, Image, Download, Palette } from 'lucide-react';
+import { FileText, Package, Megaphone, Share2, Copy, RefreshCw, Sparkles, AlertCircle, Bot, Zap, ChevronDown, Image, Download, Palette, Lock } from 'lucide-react';
 import { ContentType, ContentRequest, GeneratedContent } from '../types';
 import { generateContent } from '../utils/contentTemplates';
+import { useAuth } from '../contexts/AuthContext';
+import AuthModal from './AuthModal';
 
 const contentTypes = [
   {
@@ -49,6 +51,8 @@ const contentTypes = [
 ];
 
 const ContentGenerator = () => {
+  const { isAuthenticated, user } = useAuth();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<ContentType>('seo-blog');
   const [blogType, setBlogType] = useState<'ai-written' | 'humanized'>('ai-written');
   const [formData, setFormData] = useState<ContentRequest>({
@@ -79,6 +83,11 @@ const ContentGenerator = () => {
   };
 
   const handleGenerate = async () => {
+    if (!isAuthenticated) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+
     if (!formData.topic.trim()) return;
     
     setIsGenerating(true);
@@ -87,6 +96,13 @@ const ContentGenerator = () => {
     try {
       const content = await generateContent({ ...formData, blogType });
       setGeneratedContent(content);
+      
+      // Update user usage (mock)
+      if (user) {
+        const wordCount = content.content.split(' ').length;
+        // In real app, this would be an API call
+        console.log(`Generated ${wordCount} words for user ${user.name}`);
+      }
     } catch (error) {
       console.error('Error generating content:', error);
       setError('Failed to generate content. Please try again or check your internet connection.');
@@ -350,212 +366,251 @@ const ContentGenerator = () => {
   };
 
   return (
-    <section className="relative z-10 py-20">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-              Create Content with
-            </span>
-            <br />
-            <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Advanced AI Technology
-            </span>
-          </h2>
-          <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-            Choose your content type and let our AI generate professional, engaging content with custom images in seconds.
-          </p>
-        </div>
+    <>
+      <section className="relative z-10 py-20" id="content-generator">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                Create Content with
+              </span>
+              <br />
+              <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                Advanced AI Technology
+              </span>
+            </h2>
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+              Choose your content type and let our AI generate professional, engaging content with custom images in seconds.
+            </p>
+          </div>
 
-        <div className="grid lg:grid-cols-2 gap-12">
-          {/* Input Section */}
-          <div className="space-y-8">
-            {/* AI Status Badge */}
-            <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-2xl p-6">
-              <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <Bot className="w-8 h-8 text-blue-400" />
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-white mb-1">AI Engine Status</h3>
-                  <p className="text-sm text-gray-400">OpenAI GPT-3.5 + DALL-E 3 • Ready for content & image generation</p>
-                </div>
-                <div className="ml-auto">
-                  <Zap className="w-6 h-6 text-yellow-400" />
+          <div className="grid lg:grid-cols-2 gap-12">
+            {/* Input Section */}
+            <div className="space-y-8">
+              {/* AI Status Badge */}
+              <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-2xl p-6">
+                <div className="flex items-center space-x-4">
+                  <div className="relative">
+                    <Bot className="w-8 h-8 text-blue-400" />
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-white mb-1">AI Engine Status</h3>
+                    <p className="text-sm text-gray-400">OpenAI GPT-3.5 + DALL-E 3 • Ready for content & image generation</p>
+                  </div>
+                  <div className="ml-auto">
+                    <Zap className="w-6 h-6 text-yellow-400" />
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Content Type Selection */}
-            <div>
-              <h3 className="text-xl font-semibold text-white mb-6">Choose Content Type</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {contentTypes.map((type) => {
-                  const Icon = type.icon;
-                  return (
+              {/* Authentication Notice */}
+              {!isAuthenticated && (
+                <div className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-6">
+                  <div className="flex items-center space-x-4">
+                    <Lock className="w-8 h-8 text-orange-400" />
+                    <div>
+                      <h3 className="font-semibold text-white mb-1">Sign Up Required</h3>
+                      <p className="text-sm text-gray-400">Create a free account to start generating AI content</p>
+                    </div>
                     <button
-                      key={type.id}
-                      onClick={() => handleTypeChange(type.id)}
-                      className={`p-6 border-2 rounded-2xl text-left transition-all duration-300 hover:scale-105 ${
-                        selectedType === type.id
-                          ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/25'
-                          : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
-                      }`}
+                      onClick={() => setIsAuthModalOpen(true)}
+                      className="ml-auto bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-lg text-white font-medium transition-all duration-200"
                     >
-                      <div className="flex items-start space-x-4">
-                        <div className={`p-3 rounded-xl bg-gradient-to-r ${type.gradient} shadow-lg`}>
-                          <Icon className="w-6 h-6 text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-white mb-2">{type.title}</h4>
-                          <p className="text-sm text-gray-400 leading-relaxed">{type.description}</p>
-                          {(type.id === 'ad-copy' || type.id === 'social-media' || type.id === 'poster' || type.id === 'banner') && (
-                            <div className="flex items-center space-x-1 mt-2">
-                              <Image className="w-4 h-4 text-green-400" />
-                              <span className="text-xs text-green-400 font-medium">+ AI Image</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                      Sign Up Free
                     </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Form */}
-            <div className="bg-gray-800/50 backdrop-blur-xl border border-gray-700 rounded-2xl p-8">
-              <h3 className="text-lg font-semibold text-white mb-6">Content Details</h3>
-              {renderFormFields()}
-              
-              {error && (
-                <div className="mt-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
-                  <div className="flex items-center space-x-3">
-                    <AlertCircle className="w-5 h-5 text-red-400" />
-                    <p className="text-sm text-red-400">{error}</p>
                   </div>
                 </div>
               )}
-              
-              {selectedType !== 'poster' && selectedType !== 'banner' && (
-                <button
-                  onClick={handleGenerate}
-                  disabled={!formData.topic.trim() || isGenerating}
-                  className="w-full mt-8 bg-gradient-to-r from-blue-500 to-purple-600 py-4 px-6 rounded-xl font-semibold text-lg hover:shadow-2xl hover:shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center space-x-3"
-                >
-                  {isGenerating ? (
-                    <>
-                      <RefreshCw className="w-6 h-6 animate-spin" />
-                      <span>Generating with AI...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-6 h-6" />
-                      <span>Generate AI Content{(selectedType === 'ad-copy' || selectedType === 'social-media') ? ' + Image' : ''}</span>
-                    </>
-                  )}
-                </button>
-              )}
-            </div>
-          </div>
 
-          {/* Output Section */}
-          <div className="space-y-6">
-            {generatedContent ? (
-              <>
-                {/* Generated Image */}
-                {generatedContent.image && (
-                  <div className="bg-gray-800/50 backdrop-blur-xl border border-gray-700 rounded-2xl overflow-hidden">
-                    <div className="bg-gradient-to-r from-gray-800 to-gray-900 px-6 py-4 border-b border-gray-700">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <Image className="w-5 h-5 text-purple-400" />
-                          <div>
-                            <h3 className="text-lg font-semibold text-white">AI Generated Image</h3>
-                            <p className="text-sm text-gray-400">Custom visual for your {selectedType}</p>
+              {/* Content Type Selection */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-6">Choose Content Type</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {contentTypes.map((type) => {
+                    const Icon = type.icon;
+                    return (
+                      <button
+                        key={type.id}
+                        onClick={() => handleTypeChange(type.id)}
+                        className={`p-6 border-2 rounded-2xl text-left transition-all duration-300 hover:scale-105 ${
+                          selectedType === type.id
+                            ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/25'
+                            : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
+                        }`}
+                      >
+                        <div className="flex items-start space-x-4">
+                          <div className={`p-3 rounded-xl bg-gradient-to-r ${type.gradient} shadow-lg`}>
+                            <Icon className="w-6 h-6 text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-white mb-2">{type.title}</h4>
+                            <p className="text-sm text-gray-400 leading-relaxed">{type.description}</p>
+                            {(type.id === 'ad-copy' || type.id === 'social-media' || type.id === 'poster' || type.id === 'banner') && (
+                              <div className="flex items-center space-x-1 mt-2">
+                                <Image className="w-4 h-4 text-green-400" />
+                                <span className="text-xs text-green-400 font-medium">+ AI Image</span>
+                              </div>
+                            )}
                           </div>
                         </div>
-                        <button
-                          onClick={handleDownloadImage}
-                          className="flex items-center space-x-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-gray-300 hover:text-white transition-all duration-300"
-                        >
-                          <Download className="w-4 h-4" />
-                          <span className="text-sm">Download</span>
-                        </button>
-                      </div>
-                    </div>
-                    <div className="p-6">
-                      <img
-                        src={generatedContent.image.url}
-                        alt={generatedContent.image.prompt}
-                        className="w-full rounded-lg shadow-lg"
-                      />
-                      <p className="text-xs text-gray-500 mt-3">
-                        <strong>Prompt:</strong> {generatedContent.image.prompt}
-                      </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Form */}
+              <div className="bg-gray-800/50 backdrop-blur-xl border border-gray-700 rounded-2xl p-8">
+                <h3 className="text-lg font-semibold text-white mb-6">Content Details</h3>
+                {renderFormFields()}
+                
+                {error && (
+                  <div className="mt-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+                    <div className="flex items-center space-x-3">
+                      <AlertCircle className="w-5 h-5 text-red-400" />
+                      <p className="text-sm text-red-400">{error}</p>
                     </div>
                   </div>
                 )}
+                
+                {selectedType !== 'poster' && selectedType !== 'banner' && (
+                  <button
+                    onClick={handleGenerate}
+                    disabled={!formData.topic.trim() || isGenerating}
+                    className="w-full mt-8 bg-gradient-to-r from-blue-500 to-purple-600 py-4 px-6 rounded-xl font-semibold text-lg hover:shadow-2xl hover:shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center space-x-3"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <RefreshCw className="w-6 h-6 animate-spin" />
+                        <span>Generating with AI...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-6 h-6" />
+                        <span>Generate AI Content{(selectedType === 'ad-copy' || selectedType === 'social-media') ? ' + Image' : ''}</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
 
-                {/* Generated Content */}
-                <div className="bg-gray-800/50 backdrop-blur-xl border border-gray-700 rounded-2xl overflow-hidden">
-                  <div className="bg-gradient-to-r from-gray-800 to-gray-900 px-8 py-6 border-b border-gray-700">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Bot className="w-6 h-6 text-blue-400" />
-                        <div>
-                          <h3 className="text-lg font-semibold text-white">AI Generated Content</h3>
-                          <p className="text-sm text-gray-400">
-                            {selectedType === 'seo-blog' && blogType === 'humanized' 
-                              ? 'Humanized for Google Ranking' 
-                              : 'Powered by OpenAI GPT-3.5'
-                            }
-                          </p>
+            {/* Output Section */}
+            <div className="space-y-6">
+              {generatedContent ? (
+                <>
+                  {/* Generated Image */}
+                  {generatedContent.image && (
+                    <div className="bg-gray-800/50 backdrop-blur-xl border border-gray-700 rounded-2xl overflow-hidden">
+                      <div className="bg-gradient-to-r from-gray-800 to-gray-900 px-6 py-4 border-b border-gray-700">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <Image className="w-5 h-5 text-purple-400" />
+                            <div>
+                              <h3 className="text-lg font-semibold text-white">AI Generated Image</h3>
+                              <p className="text-sm text-gray-400">Custom visual for your {selectedType}</p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={handleDownloadImage}
+                            className="flex items-center space-x-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-gray-300 hover:text-white transition-all duration-300"
+                          >
+                            <Download className="w-4 h-4" />
+                            <span className="text-sm">Download</span>
+                          </button>
                         </div>
                       </div>
-                      <button
-                        onClick={handleCopy}
-                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-                          copied
-                            ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600'
-                        }`}
-                      >
-                        <Copy className="w-4 h-4" />
-                        <span>{copied ? 'Copied!' : 'Copy'}</span>
-                      </button>
+                      <div className="p-6">
+                        <img
+                          src={generatedContent.image.url}
+                          alt={generatedContent.image.prompt}
+                          className="w-full rounded-lg shadow-lg"
+                        />
+                        <p className="text-xs text-gray-500 mt-3">
+                          <strong>Prompt:</strong> {generatedContent.image.prompt}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Generated Content */}
+                  <div className="bg-gray-800/50 backdrop-blur-xl border border-gray-700 rounded-2xl overflow-hidden">
+                    <div className="bg-gradient-to-r from-gray-800 to-gray-900 px-8 py-6 border-b border-gray-700">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <Bot className="w-6 h-6 text-blue-400" />
+                          <div>
+                            <h3 className="text-lg font-semibold text-white">AI Generated Content</h3>
+                            <p className="text-sm text-gray-400">
+                              {selectedType === 'seo-blog' && blogType === 'humanized' 
+                                ? 'Humanized for Google Ranking' 
+                                : 'Powered by OpenAI GPT-3.5'
+                              }
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={handleCopy}
+                          className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+                            copied
+                              ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                              : 'bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600'
+                          }`}
+                        >
+                          <Copy className="w-4 h-4" />
+                          <span>{copied ? 'Copied!' : 'Copy'}</span>
+                        </button>
+                      </div>
+                    </div>
+                    <div className="p-8">
+                      <div className="prose prose-invert max-w-none">
+                        <pre className="whitespace-pre-wrap text-sm text-gray-300 font-sans leading-relaxed">
+                          {generatedContent.content}
+                        </pre>
+                      </div>
                     </div>
                   </div>
-                  <div className="p-8">
-                    <div className="prose prose-invert max-w-none">
-                      <pre className="whitespace-pre-wrap text-sm text-gray-300 font-sans leading-relaxed">
-                        {generatedContent.content}
-                      </pre>
+                </>
+              ) : (
+                <div className="bg-gray-800/30 border-2 border-dashed border-gray-600 rounded-2xl p-16 text-center">
+                  <div className="relative mb-6">
+                    <Sparkles className="w-16 h-16 text-gray-500 mx-auto" />
+                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                      <Bot className="w-3 h-3 text-white" />
                     </div>
                   </div>
+                  <h3 className="text-xl font-semibold text-gray-400 mb-3">Ready to Generate AI Content</h3>
+                  <p className="text-gray-500 max-w-md mx-auto">
+                    {!isAuthenticated 
+                      ? 'Sign up for free to start generating high-quality content with advanced AI technology.'
+                      : `Fill in the details and click "Generate AI Content" to create high-quality content 
+                        ${(selectedType === 'ad-copy' || selectedType === 'social-media') ? ' with custom images ' : ' '}
+                        powered by artificial intelligence.`
+                    }
+                  </p>
+                  {!isAuthenticated && (
+                    <button
+                      onClick={() => setIsAuthModalOpen(true)}
+                      className="mt-4 bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300"
+                    >
+                      Start Free Trial
+                    </button>
+                  )}
                 </div>
-              </>
-            ) : (
-              <div className="bg-gray-800/30 border-2 border-dashed border-gray-600 rounded-2xl p-16 text-center">
-                <div className="relative mb-6">
-                  <Sparkles className="w-16 h-16 text-gray-500 mx-auto" />
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                    <Bot className="w-3 h-3 text-white" />
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-400 mb-3">Ready to Generate AI Content</h3>
-                <p className="text-gray-500 max-w-md mx-auto">
-                  Fill in the details and click "Generate AI Content" to create high-quality content 
-                  {(selectedType === 'ad-copy' || selectedType === 'social-media') ? ' with custom images ' : ' '}
-                  powered by advanced artificial intelligence.
-                </p>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        initialMode="register"
+      />
+    </>
   );
 };
 

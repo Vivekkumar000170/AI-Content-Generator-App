@@ -1,14 +1,27 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, ArrowRight, Play, Zap, Target, TrendingUp } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import VideoModal from './VideoModal';
+import AuthModal from './AuthModal';
 
 const Hero = () => {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   const handleStartCreating = () => {
-    navigate('/pricing');
+    if (isAuthenticated) {
+      // User is logged in, scroll to content generator
+      const element = document.getElementById('content-generator');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // Show signup modal for free trial
+      setIsAuthModalOpen(true);
+    }
   };
 
   const handleWatchDemo = () => {
@@ -17,7 +30,7 @@ const Hero = () => {
 
   return (
     <>
-      <section className="relative z-10 pt-20 pb-32">
+      <section className="relative z-10 pt-20 pb-32" id="hero">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center max-w-4xl mx-auto">
             {/* Badge */}
@@ -50,7 +63,7 @@ const Hero = () => {
                 onClick={handleStartCreating}
                 className="group bg-gradient-to-r from-blue-500 to-purple-600 px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 flex items-center space-x-2"
               >
-                <span>Start Creating</span>
+                <span>{isAuthenticated ? 'Start Creating' : 'Start Free Trial'}</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
               <button 
@@ -102,6 +115,14 @@ const Hero = () => {
       <VideoModal 
         isOpen={isVideoModalOpen} 
         onClose={() => setIsVideoModalOpen(false)} 
+      />
+
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        initialMode="register"
+        redirectTo="#content-generator"
       />
     </>
   );
