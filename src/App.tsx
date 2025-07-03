@@ -7,6 +7,7 @@ import Solutions from './pages/Solutions';
 import Features from './pages/Features';
 import Pricing from './pages/Pricing';
 import About from './pages/About';
+import AccountSettings from './pages/AccountSettings';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
             <Route path="/features" element={<Features />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/about" element={<About />} />
+            <Route path="/account-settings" element={<AccountSettings />} />
           </Routes>
         </Layout>
       </Router>

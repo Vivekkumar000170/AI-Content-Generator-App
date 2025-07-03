@@ -48,8 +48,8 @@ const UserDashboard = () => {
     e.preventDefault();
     e.stopPropagation();
     console.log('Opening account settings...');
-    // In a real app, this would navigate to settings page
-    alert('Account Settings - This would open the settings page in a real application.');
+    // Navigate to account settings page
+    navigate('/account-settings');
   };
 
   const handleUpgrade = (e: React.MouseEvent) => {
