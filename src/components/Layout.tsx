@@ -65,7 +65,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </div>
 
       {/* Header with Glass Morphism */}
-      <header className="relative z-10 bg-gray-900/60 backdrop-blur-3xl border-b border-white/10 shadow-2xl">
+      <header className="relative z-50 bg-gray-900/60 backdrop-blur-3xl border-b border-white/10 shadow-2xl">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center space-x-3 hover:scale-105 transition-transform duration-300">
@@ -129,7 +129,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               
               {/* User Menu or Get Started Button */}
               {isAuthenticated ? (
-                <div className="relative" ref={userMenuRef}>
+                <div className="relative z-50" ref={userMenuRef}>
                   <button
                     onClick={handleUserMenuToggle}
                     className="flex items-center space-x-2 bg-gray-800/30 backdrop-blur-2xl border border-white/10 px-4 py-2 rounded-lg hover:bg-gray-700/30 transition-all duration-300 hover:scale-105"
@@ -140,14 +140,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <span className="text-gray-300">{user?.name}</span>
                   </button>
                   
-                  {/* User Dropdown with Dark Blur Background */}
+                  {/* User Dropdown with Maximum Z-Index */}
                   {isUserMenuOpen && (
                     <>
-                      {/* Dark blur backdrop */}
-                      <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"></div>
+                      {/* Dark blur backdrop with very high z-index */}
+                      <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[9998]"></div>
                       
-                      {/* Dropdown menu */}
-                      <div className="absolute right-0 top-full mt-2 z-50">
+                      {/* Dropdown menu with maximum z-index */}
+                      <div className="absolute right-0 top-full mt-2 z-[9999]">
                         <UserDashboard />
                       </div>
                     </>
