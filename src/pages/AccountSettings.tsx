@@ -17,7 +17,7 @@ const AccountSettings = () => {
     confirmPassword: ''
   });
   
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [profileImage, setProfileImage] = useState<string | null>(user?.profileImage || null);
   const [showPasswords, setShowPasswords] = useState({
     current: false,
     new: false,
@@ -36,7 +36,8 @@ const AccountSettings = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setProfileImage(e.target?.result as string);
+        const imageDataUrl = e.target?.result as string;
+        setProfileImage(imageDataUrl);
       };
       reader.readAsDataURL(file);
     }
@@ -50,12 +51,12 @@ const AccountSettings = () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Update user data
+      // Update user data including profile image
       const updatedUser = {
         ...user!,
         name: `${formData.firstName} ${formData.lastName}`.trim(),
         email: formData.email,
-        // In a real app, you'd also save phone and profile image
+        profileImage: profileImage || undefined, // Include profile image in update
       };
 
       updateUser(updatedUser);

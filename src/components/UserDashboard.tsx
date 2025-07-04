@@ -65,8 +65,16 @@ const UserDashboard = () => {
       {/* User Info Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-            <User className="w-6 h-6 text-white" />
+          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg overflow-hidden">
+            {user.profileImage ? (
+              <img
+                src={user.profileImage}
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <User className="w-6 h-6 text-white" />
+            )}
           </div>
           <div>
             <h3 className="text-lg font-semibold text-white">{user.name}</h3>

@@ -5,6 +5,7 @@ interface User {
   name: string;
   email: string;
   plan: string;
+  profileImage?: string; // Add profile image field
   subscription: {
     status: string;
     startDate: string;
@@ -56,6 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         name: 'Demo User',
         email: email,
         plan: 'starter',
+        profileImage: localStorage.getItem('userProfileImage') || undefined, // Load saved profile image
         subscription: {
           status: 'trial',
           startDate: new Date().toISOString(),
@@ -91,6 +93,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       name: name,
       email: email,
       plan: plan,
+      profileImage: undefined, // New users don't have profile image initially
       subscription: {
         status: 'trial',
         startDate: new Date().toISOString(),
@@ -122,8 +125,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (storedToken && storedUser) {
         try {
+          const parsedUser = JSON.parse(storedUser);
+          // Load profile image from localStorage if it exists
+          const savedProfileImage = localStorage.getItem('userProfileImage');
+          if (savedProfileImage) {
+            parsedUser.profileImage = savedProfileImage;
+          }
+          
           setToken(storedToken);
-          setUser(JSON.parse(storedUser));
+          setUser(parsedUser);
         } catch (error) {
           console.error('Failed to restore auth state:', error);
           logout();
@@ -166,6 +176,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setToken(null);
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
+    localStorage.removeItem('userProfileImage'); // Clear profile image on logout
   };
 
   const updateUser = (userData: Partial<User>) => {
@@ -173,6 +184,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const updatedUser = { ...user, ...userData };
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      // If profile image is being updated, save it separately for persistence
+      if (userData.profileImage) {
+        localStorage.setItem('userProfileImage', userData.profileImage);
+      }
     }
   };
 
