@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Mail, Phone, Save, Upload, Camera, ArrowLeft, Eye, EyeOff, Lock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -26,6 +26,13 @@ const AccountSettings = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
+  // Update profile image when user data changes
+  useEffect(() => {
+    if (user?.profileImage && !profileImage) {
+      setProfileImage(user.profileImage);
+    }
+  }, [user?.profileImage]);
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     setMessage(null);
@@ -38,6 +45,9 @@ const AccountSettings = () => {
       reader.onload = (e) => {
         const imageDataUrl = e.target?.result as string;
         setProfileImage(imageDataUrl);
+        
+        // Immediately update the user context with the new profile image
+        updateUser({ profileImage: imageDataUrl });
       };
       reader.readAsDataURL(file);
     }
