@@ -8,6 +8,7 @@ import Features from './pages/Features';
 import Pricing from './pages/Pricing';
 import About from './pages/About';
 import AccountSettings from './pages/AccountSettings';
+import VerifyEmail from './pages/VerifyEmail';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/about" element={<About />} />
             <Route path="/account-settings" element={<AccountSettings />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
           </Routes>
         </Layout>
       </Router>

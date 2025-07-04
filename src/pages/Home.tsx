@@ -4,6 +4,7 @@ import Stats from '../components/Stats';
 import Features from '../components/Features';
 import ContentGenerator from '../components/ContentGenerator';
 import PosterBannerGenerator from '../components/PosterBannerGenerator';
+import EmailVerificationDemo from '../components/EmailVerificationDemo';
 
 const Home = () => {
   return (
@@ -15,6 +16,7 @@ const Home = () => {
       <div id="poster-banner-generator">
         <PosterBannerGenerator />
       </div>
+      <EmailVerificationDemo />
     </>
   );
 };
