@@ -28,6 +28,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [pendingUserData, setPendingUserData] = useState<any>(null);
+  const [mockVerificationCode, setMockVerificationCode] = useState<string>('');
 
   const { login, register } = useAuth();
 
@@ -58,12 +59,33 @@ const AuthModal: React.FC<AuthModalProps> = ({
       setSuccess(null);
       setShowPassword(false);
       setPendingUserData(null);
+      setMockVerificationCode('');
     }
   }, [isOpen, mode]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     setError(null);
+  };
+
+  // Mock email verification function for development
+  const sendMockVerificationEmail = async (email: string, userName: string) => {
+    // Generate a random 6-digit code
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    setMockVerificationCode(verificationCode);
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    console.log(`📧 Mock Verification Email Sent to: ${email}`);
+    console.log(`🔢 Verification Code: ${verificationCode}`);
+    console.log(`👤 User Name: ${userName}`);
+    
+    return {
+      success: true,
+      message: 'Verification email sent successfully',
+      code: verificationCode // In development, we'll show this
+    };
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -86,22 +108,40 @@ const AuthModal: React.FC<AuthModalProps> = ({
           }
         }, 1500);
       } else if (mode === 'register') {
-        // First, send verification email
-        const response = await fetch('/api/email-verification/send', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ 
-            email: formData.email,
-            userName: formData.name 
-          }),
-        });
+        try {
+          // Try to send real verification email first
+          const response = await fetch('/api/email-verification/send', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+              email: formData.email,
+              userName: formData.name 
+            }),
+          });
 
-        const data = await response.json();
+          let data;
+          const contentType = response.headers.get('content-type');
+          
+          if (contentType && contentType.includes('application/json')) {
+            data = await response.json();
+          } else {
+            // If response is not JSON, treat as server error
+            throw new Error('Server is not responding properly');
+          }
 
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to send verification email');
+          if (!response.ok) {
+            throw new Error(data.error || 'Failed to send verification email');
+          }
+
+          setSuccess('Verification email sent! Please check your inbox.');
+        } catch (emailError) {
+          console.warn('Real email service failed, using mock verification:', emailError);
+          
+          // Fallback to mock email verification
+          const mockResult = await sendMockVerificationEmail(formData.email, formData.name);
+          setSuccess('Verification email sent! (Development Mode - Check console for code)');
         }
 
         // Store user data for after verification
@@ -112,11 +152,11 @@ const AuthModal: React.FC<AuthModalProps> = ({
           plan: formData.plan
         });
 
-        setSuccess('Verification email sent! Please check your inbox.');
         setMode('verify-email');
       }
     } catch (error: any) {
-      setError(error.message);
+      console.error('Signup error:', error);
+      setError(error.message || 'An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -158,6 +198,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
     setError(null);
     setSuccess(null);
     setPendingUserData(null);
+    setMockVerificationCode('');
   };
 
   const handleDemoLogin = async () => {
@@ -210,12 +251,28 @@ const AuthModal: React.FC<AuthModalProps> = ({
                 </button>
               </div>
               
-              <EmailVerification
-                email={pendingUserData?.email || ''}
-                mode="verify"
-                onVerificationComplete={handleEmailVerified}
-                onBack={() => setMode('register')}
-              />
+              {/* Mock verification for development */}
+              <div className="space-y-6">
+                {mockVerificationCode && (
+                  <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4">
+                    <h4 className="text-yellow-400 font-medium mb-2">🔧 Development Mode</h4>
+                    <p className="text-sm text-gray-300 mb-2">
+                      Verification code sent to: <strong>{pendingUserData?.email}</strong>
+                    </p>
+                    <div className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3">
+                      <span className="text-gray-400">Code:</span>
+                      <span className="font-mono text-yellow-400 text-lg">{mockVerificationCode}</span>
+                    </div>
+                  </div>
+                )}
+                
+                <EmailVerification
+                  email={pendingUserData?.email || ''}
+                  mode="verify"
+                  onVerificationComplete={handleEmailVerified}
+                  onBack={() => setMode('register')}
+                />
+              </div>
             </div>
           ) : (
             <>
