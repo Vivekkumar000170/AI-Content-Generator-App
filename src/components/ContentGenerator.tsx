@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FileText, Package, Megaphone, Share2, Copy, RefreshCw, Sparkles, AlertCircle, Bot, Zap, ChevronDown, Image, Download, Palette, Lock } from 'lucide-react';
 import { ContentType, ContentRequest, GeneratedContent } from '../types';
 import { generateContent } from '../utils/contentTemplates';
@@ -51,7 +51,7 @@ const contentTypes = [
 ];
 
 const ContentGenerator = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, updateUser } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<ContentType>('seo-blog');
   const [blogType, setBlogType] = useState<'ai-written' | 'humanized'>('ai-written');
@@ -71,6 +71,25 @@ const ContentGenerator = () => {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Listen for user usage updates
+  useEffect(() => {
+    const handleUsageUpdate = (event: CustomEvent) => {
+      if (user) {
+        updateUser({ 
+          usage: { 
+            ...user.usage, 
+            wordsGenerated: event.detail.wordsGenerated 
+          } 
+        });
+      }
+    };
+
+    window.addEventListener('userUsageUpdated', handleUsageUpdate as EventListener);
+    return () => {
+      window.removeEventListener('userUsageUpdated', handleUsageUpdate as EventListener);
+    };
+  }, [user, updateUser]);
+
   const handleTypeChange = (type: ContentType) => {
     setSelectedType(type);
     setFormData(prev => ({ ...prev, type }));
@@ -82,13 +101,33 @@ const ContentGenerator = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const checkUsageLimit = (estimatedWordCount: number = 500): boolean => {
+    if (!user) return false;
+    if (user.plan === 'enterprise') return true;
+    if (user.usage.wordsLimit === -1) return true;
+    
+    return (user.usage.wordsGenerated + estimatedWordCount) <= user.usage.wordsLimit;
+  };
+
   const handleGenerate = async () => {
     if (!isAuthenticated) {
       setIsAuthModalOpen(true);
       return;
     }
 
+    if (!user?.isEmailVerified) {
+      setError('Please verify your email address before generating content.');
+      return;
+    }
+
     if (!formData.topic.trim()) return;
+
+    // Check usage limits
+    const estimatedWordCount = selectedType === 'ad-copy' ? 1000 : 500;
+    if (!checkUsageLimit(estimatedWordCount)) {
+      setError(`Usage limit exceeded. You have ${Math.max(0, user!.usage.wordsLimit - user!.usage.wordsGenerated)} words remaining.`);
+      return;
+    }
     
     setIsGenerating(true);
     setError(null);
@@ -96,13 +135,6 @@ const ContentGenerator = () => {
     try {
       const content = await generateContent({ ...formData, blogType });
       setGeneratedContent(content);
-      
-      // Update user usage (mock)
-      if (user) {
-        const wordCount = content.content.split(' ').length;
-        // In real app, this would be an API call
-        console.log(`Generated ${wordCount} words for user ${user.name}`);
-      }
     } catch (error) {
       console.error('Error generating content:', error);
       setError('Failed to generate content. Please try again or check your internet connection.');
@@ -423,6 +455,51 @@ const ContentGenerator = () => {
                 </div>
               )}
 
+              {/* Email Verification Notice */}
+              {isAuthenticated && user && !user.isEmailVerified && (
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-6">
+                  <div className="flex items-center space-x-4">
+                    <AlertCircle className="w-8 h-8 text-yellow-400" />
+                    <div>
+                      <h3 className="font-semibold text-white mb-1">Email Verification Required</h3>
+                      <p className="text-sm text-gray-400">Please verify your email address to start generating content</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Usage Limit Warning */}
+              {isAuthenticated && user && user.isEmailVerified && user.plan !== 'enterprise' && (
+                <div className="bg-gray-800/50 backdrop-blur-xl border border-gray-700 rounded-2xl p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-white">Usage This Month</h3>
+                    <span className="text-sm text-gray-400">
+                      {user.usage.wordsGenerated.toLocaleString()} / {
+                        user.usage.wordsLimit === -1 
+                          ? 'Unlimited' 
+                          : user.usage.wordsLimit.toLocaleString()
+                      } words
+                    </span>
+                  </div>
+                  {user.usage.wordsLimit !== -1 && (
+                    <div className="w-full bg-gray-700/50 rounded-full h-2 mb-2">
+                      <div 
+                        className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-300"
+                        style={{ 
+                          width: `${Math.min((user.usage.wordsGenerated / user.usage.wordsLimit) * 100, 100)}%` 
+                        }}
+                      ></div>
+                    </div>
+                  )}
+                  <p className="text-xs text-gray-500">
+                    {user.usage.wordsLimit === -1 
+                      ? 'Unlimited words remaining'
+                      : `${Math.max(0, user.usage.wordsLimit - user.usage.wordsGenerated)} words remaining`
+                    }
+                  </p>
+                </div>
+              )}
+
               {/* Content Type Selection */}
               <div>
                 <h3 className="text-xl font-semibold text-white mb-6">Choose Content Type</h3>
@@ -477,7 +554,7 @@ const ContentGenerator = () => {
                 {selectedType !== 'poster' && selectedType !== 'banner' && (
                   <button
                     onClick={handleGenerate}
-                    disabled={!formData.topic.trim() || isGenerating}
+                    disabled={!formData.topic.trim() || isGenerating || !isAuthenticated || (user && !user.isEmailVerified)}
                     className="w-full mt-8 bg-gradient-to-r from-blue-500 to-purple-600 py-4 px-6 rounded-xl font-semibold text-lg hover:shadow-2xl hover:shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center space-x-3"
                   >
                     {isGenerating ? (
@@ -584,6 +661,8 @@ const ContentGenerator = () => {
                   <p className="text-gray-500 max-w-md mx-auto">
                     {!isAuthenticated 
                       ? 'Sign up for free to start generating high-quality content with advanced AI technology.'
+                      : user && !user.isEmailVerified
+                      ? 'Please verify your email address to start generating content.'
                       : `Fill in the details and click "Generate AI Content" to create high-quality content 
                         ${(selectedType === 'ad-copy' || selectedType === 'social-media') ? ' with custom images ' : ' '}
                         powered by artificial intelligence.`

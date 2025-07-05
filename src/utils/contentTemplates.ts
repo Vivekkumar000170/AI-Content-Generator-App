@@ -1,6 +1,7 @@
 import { ContentRequest, GeneratedContent } from '../types';
 import { generateAIContent } from '../services/openai';
 import { generateImage } from '../services/imageGeneration';
+import { useAuth } from '../contexts/AuthContext';
 
 export const generateContent = async (request: ContentRequest): Promise<GeneratedContent> => {
   try {
@@ -19,6 +20,10 @@ export const generateContent = async (request: ContentRequest): Promise<Generate
       }
     }
     
+    // Simulate updating user usage (word count)
+    const wordCount = content.split(' ').length;
+    updateUserWordUsage(wordCount);
+    
     return {
       title,
       content,
@@ -31,6 +36,25 @@ export const generateContent = async (request: ContentRequest): Promise<Generate
     
     // Fallback to template-based generation
     return generateFallbackContent(request);
+  }
+};
+
+// Function to update user's word usage
+const updateUserWordUsage = (wordCount: number) => {
+  try {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      user.usage.wordsGenerated += wordCount;
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      // Dispatch custom event to update auth context
+      window.dispatchEvent(new CustomEvent('userUsageUpdated', { 
+        detail: { wordsGenerated: user.usage.wordsGenerated } 
+      }));
+    }
+  } catch (error) {
+    console.error('Failed to update user usage:', error);
   }
 };
 
@@ -111,6 +135,10 @@ What's your experience? Share in the comments! 👇
       // Continue without image
     }
   }
+  
+  // Update word usage for fallback content too
+  const wordCount = content.split(' ').length;
+  updateUserWordUsage(wordCount);
   
   return {
     title,

@@ -5,7 +5,8 @@ interface User {
   name: string;
   email: string;
   plan: string;
-  profileImage?: string; // Add profile image field
+  profileImage?: string;
+  isEmailVerified: boolean; // Add email verification status
   subscription: {
     status: string;
     startDate: string;
@@ -57,7 +58,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         name: 'Demo User',
         email: email,
         plan: 'starter',
-        profileImage: localStorage.getItem('userProfileImage') || undefined, // Load saved profile image
+        profileImage: localStorage.getItem('userProfileImage') || undefined,
+        isEmailVerified: true, // Demo user is pre-verified
         subscription: {
           status: 'trial',
           startDate: new Date().toISOString(),
@@ -93,7 +95,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       name: name,
       email: email,
       plan: plan,
-      profileImage: undefined, // New users don't have profile image initially
+      profileImage: undefined,
+      isEmailVerified: true, // Set to true after email verification
       subscription: {
         status: 'trial',
         startDate: new Date().toISOString(),
@@ -176,7 +179,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setToken(null);
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
-    localStorage.removeItem('userProfileImage'); // Clear profile image on logout
+    localStorage.removeItem('userProfileImage');
   };
 
   const updateUser = (userData: Partial<User>) => {
