@@ -8,6 +8,7 @@ import contentRoutes from './routes/content.js';
 import userRoutes from './routes/user.js';
 import analyticsRoutes from './routes/analytics.js';
 import emailVerificationRoutes from './routes/emailVerification.js';
+import emailRoutes from './routes/emailRoutes.js';
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ app.use('/api/content', contentRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/email-verification', emailVerificationRoutes);
+app.use('/api/email', emailRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -66,4 +68,5 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🌐 Client URL: ${process.env.CLIENT_URL || 'http://localhost:5173'}`);
+  console.log(`📧 Email service: Gmail SMTP enabled`);
 });
