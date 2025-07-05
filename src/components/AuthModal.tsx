@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Mail, Lock, User, AlertCircle, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import EmailVerification from './EmailVerification';
+import { emailService } from '../services/emailService';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -23,14 +23,38 @@ const AuthModal: React.FC<AuthModalProps> = ({
     password: '',
     plan: 'starter'
   });
+  const [verificationCode, setVerificationCode] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [pendingUserData, setPendingUserData] = useState<any>(null);
   const [mockVerificationCode, setMockVerificationCode] = useState<string>('');
+  const [timeLeft, setTimeLeft] = useState(900); // 15 minutes
 
   const { login, register } = useAuth();
+
+  // Countdown timer
+  React.useEffect(() => {
+    if (mode === 'verify-email' && timeLeft > 0) {
+      const timer = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [mode, timeLeft]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   // Handle escape key press
   React.useEffect(() => {
@@ -55,11 +79,13 @@ const AuthModal: React.FC<AuthModalProps> = ({
   React.useEffect(() => {
     if (isOpen) {
       setFormData({ name: '', email: '', password: '', plan: 'starter' });
+      setVerificationCode('');
       setError(null);
       setSuccess(null);
       setShowPassword(false);
       setPendingUserData(null);
       setMockVerificationCode('');
+      setTimeLeft(900);
     }
   }, [isOpen, mode]);
 
@@ -68,24 +94,98 @@ const AuthModal: React.FC<AuthModalProps> = ({
     setError(null);
   };
 
-  // Mock email verification function for development
-  const sendMockVerificationEmail = async (email: string, userName: string) => {
-    // Generate a random 6-digit code
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-    setMockVerificationCode(verificationCode);
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    console.log(`📧 Mock Verification Email Sent to: ${email}`);
-    console.log(`🔢 Verification Code: ${verificationCode}`);
-    console.log(`👤 User Name: ${userName}`);
-    
-    return {
-      success: true,
-      message: 'Verification email sent successfully',
-      code: verificationCode // In development, we'll show this
-    };
+  const handleSendVerification = async () => {
+    setIsLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const result = await emailService.sendVerificationEmail(formData.email, formData.name);
+      
+      if (result.success) {
+        setMockVerificationCode(result.code);
+        setSuccess('Verification email sent! Check the development console for your code.');
+        
+        // Store user data for after verification
+        setPendingUserData({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          plan: formData.plan
+        });
+
+        setMode('verify-email');
+        setTimeLeft(900); // Reset timer
+      } else {
+        setError('Failed to send verification email. Please try again.');
+      }
+    } catch (error: any) {
+      console.error('Verification email error:', error);
+      setError('Failed to send verification email. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    if (!verificationCode.trim() || verificationCode.length !== 6) {
+      setError('Please enter a valid 6-digit verification code.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Use development-friendly verification
+      const result = await emailService.verifyAnyCode(formData.email, verificationCode);
+      
+      if (result.success && pendingUserData) {
+        // Create the user account
+        await register(
+          pendingUserData.name, 
+          pendingUserData.email, 
+          pendingUserData.password, 
+          pendingUserData.plan
+        );
+        
+        setSuccess('Account created successfully! Your free trial has started.');
+        setTimeout(() => {
+          onClose();
+          if (redirectTo) {
+            const element = document.querySelector(redirectTo);
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth' });
+            }
+          }
+        }, 1500);
+      } else {
+        setError(result.message || 'Invalid verification code. Please try again.');
+      }
+    } catch (error: any) {
+      console.error('Verification error:', error);
+      setError('Verification failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (pendingUserData) {
+      setIsLoading(true);
+      try {
+        const result = await emailService.sendVerificationEmail(pendingUserData.email, pendingUserData.name);
+        if (result.success) {
+          setMockVerificationCode(result.code);
+          setSuccess('New verification code sent! Check the console.');
+          setTimeLeft(900);
+        }
+      } catch (error) {
+        setError('Failed to resend code. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -108,88 +208,12 @@ const AuthModal: React.FC<AuthModalProps> = ({
           }
         }, 1500);
       } else if (mode === 'register') {
-        try {
-          // Try to send real verification email first
-          const response = await fetch('/api/email-verification/send', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ 
-              email: formData.email,
-              userName: formData.name 
-            }),
-          });
-
-          let data;
-          const contentType = response.headers.get('content-type');
-          
-          if (contentType && contentType.includes('application/json')) {
-            data = await response.json();
-          } else {
-            // If response is not JSON, treat as server error
-            throw new Error('Server is not responding properly');
-          }
-
-          if (!response.ok) {
-            throw new Error(data.error || 'Failed to send verification email');
-          }
-
-          setSuccess('Verification email sent! Please check your inbox.');
-        } catch (emailError) {
-          console.warn('Real email service failed, using mock verification:', emailError);
-          
-          // Fallback to mock email verification
-          const mockResult = await sendMockVerificationEmail(formData.email, formData.name);
-          setSuccess('Verification email sent! (Development Mode - Check console for code)');
-        }
-
-        // Store user data for after verification
-        setPendingUserData({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          plan: formData.plan
-        });
-
-        setMode('verify-email');
+        await handleSendVerification();
       }
     } catch (error: any) {
-      console.error('Signup error:', error);
-      setError(error.message || 'An unexpected error occurred. Please try again.');
+      setError(error.message);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleEmailVerified = async (verifiedEmail: string) => {
-    if (pendingUserData && pendingUserData.email === verifiedEmail) {
-      try {
-        setIsLoading(true);
-        // Now create the user account
-        await register(
-          pendingUserData.name, 
-          pendingUserData.email, 
-          pendingUserData.password, 
-          pendingUserData.plan
-        );
-        
-        setSuccess('Account created successfully! Your free trial has started.');
-        setTimeout(() => {
-          onClose();
-          if (redirectTo) {
-            const element = document.querySelector(redirectTo);
-            if (element) {
-              element.scrollIntoView({ behavior: 'smooth' });
-            }
-          }
-        }, 1500);
-      } catch (error: any) {
-        setError(error.message);
-        setMode('register'); // Go back to registration form
-      } finally {
-        setIsLoading(false);
-      }
     }
   };
 
@@ -199,6 +223,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
     setSuccess(null);
     setPendingUserData(null);
     setMockVerificationCode('');
+    setVerificationCode('');
   };
 
   const handleDemoLogin = async () => {
@@ -251,27 +276,114 @@ const AuthModal: React.FC<AuthModalProps> = ({
                 </button>
               </div>
               
-              {/* Mock verification for development */}
               <div className="space-y-6">
+                {/* Development Mode Notice */}
+                <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+                  <h4 className="text-blue-400 font-medium mb-2">📧 Email Sent!</h4>
+                  <p className="text-sm text-gray-300 mb-2">
+                    Verification code sent to: <strong>{pendingUserData?.email}</strong>
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    Check your email inbox and spam folder for the 6-digit code.
+                  </p>
+                </div>
+
+                {/* Development Code Display */}
                 {mockVerificationCode && (
                   <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4">
                     <h4 className="text-yellow-400 font-medium mb-2">🔧 Development Mode</h4>
-                    <p className="text-sm text-gray-300 mb-2">
-                      Verification code sent to: <strong>{pendingUserData?.email}</strong>
-                    </p>
                     <div className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3">
-                      <span className="text-gray-400">Code:</span>
+                      <span className="text-gray-400">Your Code:</span>
                       <span className="font-mono text-yellow-400 text-lg">{mockVerificationCode}</span>
+                    </div>
+                    <p className="text-xs text-yellow-300 mt-2">
+                      Copy this code or enter any 6-digit number for testing
+                    </p>
+                  </div>
+                )}
+
+                {/* Error/Success Messages */}
+                {error && (
+                  <div className="p-3 bg-red-500/10 backdrop-blur-2xl border border-red-500/20 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <AlertCircle className="w-4 h-4 text-red-400" />
+                      <p className="text-sm text-red-400">{error}</p>
                     </div>
                   </div>
                 )}
-                
-                <EmailVerification
-                  email={pendingUserData?.email || ''}
-                  mode="verify"
-                  onVerificationComplete={handleEmailVerified}
-                  onBack={() => setMode('register')}
-                />
+
+                {success && (
+                  <div className="p-3 bg-green-500/10 backdrop-blur-2xl border border-green-500/20 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="w-4 h-4 text-green-400" />
+                      <p className="text-sm text-green-400">{success}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Verification Code Input */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Enter Verification Code
+                  </label>
+                  <input
+                    type="text"
+                    value={verificationCode}
+                    onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="000000"
+                    className="w-full px-4 py-3 bg-gray-800/50 backdrop-blur-xl border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-white placeholder-gray-400 text-center text-2xl font-mono tracking-widest"
+                    maxLength={6}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Enter the 6-digit code from your email
+                  </p>
+                </div>
+
+                {/* Verify Button */}
+                <button
+                  onClick={handleVerifyCode}
+                  disabled={isLoading || verificationCode.length !== 6}
+                  className="w-full bg-gradient-to-r from-green-500 to-emerald-600 py-3 px-4 rounded-xl font-semibold text-white hover:shadow-lg hover:shadow-green-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center space-x-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>Verifying...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-4 h-4" />
+                      <span>Verify & Create Account</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Timer and Resend */}
+                <div className="text-center">
+                  {timeLeft > 0 ? (
+                    <p className="text-gray-400 text-sm mb-2">
+                      Code expires in <span className="font-mono text-blue-400">{formatTime(timeLeft)}</span>
+                    </p>
+                  ) : (
+                    <p className="text-gray-400 text-sm mb-2">Code has expired</p>
+                  )}
+                  
+                  <button
+                    onClick={handleResendCode}
+                    disabled={isLoading}
+                    className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
+                  >
+                    Resend verification code
+                  </button>
+                </div>
+
+                {/* Back Button */}
+                <button
+                  onClick={() => setMode('register')}
+                  className="w-full bg-gray-700/30 backdrop-blur-2xl hover:bg-gray-600/30 py-2 px-4 rounded-lg font-medium text-gray-300 hover:text-white transition-all duration-300 border border-white/10"
+                >
+                  ← Back to Registration
+                </button>
               </div>
             </div>
           ) : (
