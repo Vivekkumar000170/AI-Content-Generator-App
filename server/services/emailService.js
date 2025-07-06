@@ -7,23 +7,9 @@ class EmailService {
   }
 
   createTransporter() {
-    // For development/testing - use Ethereal Email (fake SMTP)
-    if (process.env.NODE_ENV === 'development') {
-      return nodemailer.createTransporter({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        auth: {
-          user: 'ethereal.user@ethereal.email',
-          pass: 'ethereal.pass'
-        }
-      });
-    }
-
-    // For production - use your preferred email service
-    // Example configurations for popular services:
-
-    // Gmail SMTP
-    if (process.env.EMAIL_SERVICE === 'gmail') {
+    // Check if we have Gmail credentials
+    if (process.env.EMAIL_SERVICE === 'gmail' && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      console.log('📧 Using Gmail SMTP for email sending');
       return nodemailer.createTransporter({
         service: 'gmail',
         auth: {
@@ -34,7 +20,8 @@ class EmailService {
     }
 
     // SendGrid SMTP
-    if (process.env.EMAIL_SERVICE === 'sendgrid') {
+    if (process.env.EMAIL_SERVICE === 'sendgrid' && process.env.SENDGRID_API_KEY) {
+      console.log('📧 Using SendGrid SMTP for email sending');
       return nodemailer.createTransporter({
         host: 'smtp.sendgrid.net',
         port: 587,
@@ -46,7 +33,8 @@ class EmailService {
     }
 
     // AWS SES
-    if (process.env.EMAIL_SERVICE === 'ses') {
+    if (process.env.EMAIL_SERVICE === 'ses' && process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
+      console.log('📧 Using AWS SES for email sending');
       return nodemailer.createTransporter({
         SES: {
           aws: {
@@ -58,12 +46,18 @@ class EmailService {
       });
     }
 
-    // Default fallback to console logging for development
-    return nodemailer.createTransporter({
-      streamTransport: true,
-      newline: 'unix',
-      buffer: true
-    });
+    // For development/testing - use Ethereal Email (fake SMTP) or console logging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('📧 Development mode: Using console logging for emails');
+      return nodemailer.createTransporter({
+        streamTransport: true,
+        newline: 'unix',
+        buffer: true
+      });
+    }
+
+    // Fallback: throw error if no email service is configured
+    throw new Error('No email service configured. Please set EMAIL_SERVICE and corresponding credentials in environment variables.');
   }
 
   /**
@@ -80,13 +74,16 @@ class EmailService {
       const mailOptions = {
         from: {
           name: 'NextMind AI',
-          address: process.env.EMAIL_FROM || 'noreply@nextmind-ai.com'
+          address: process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@nextmind-ai.com'
         },
         to: email,
         subject: 'Verify Your Email Address - NextMind AI',
         html: this.getVerificationEmailTemplate(email, verificationUrl, code, userName),
         text: this.getVerificationEmailText(email, verificationUrl, code, userName)
       };
+
+      console.log('📧 Attempting to send email to:', email);
+      console.log('📧 Using transporter:', this.transporter.options?.service || 'custom');
 
       const result = await this.transporter.sendMail(mailOptions);
       
@@ -96,16 +93,38 @@ class EmailService {
         console.log('Preview URL:', nodemailer.getTestMessageUrl(result));
         console.log('Verification Code:', code);
         console.log('Verification URL:', verificationUrl);
+        
+        // In development, also log the email content to console
+        console.log('📧 Email content (development only):');
+        console.log('Subject:', mailOptions.subject);
+        console.log('To:', mailOptions.to);
+        console.log('Verification Code:', code);
+      } else {
+        console.log('📧 Email sent successfully to:', email);
+        console.log('📧 Message ID:', result.messageId);
       }
 
       return {
         success: true,
         messageId: result.messageId,
-        previewUrl: process.env.NODE_ENV === 'development' ? nodemailer.getTestMessageUrl(result) : null
+        previewUrl: process.env.NODE_ENV === 'development' ? nodemailer.getTestMessageUrl(result) : null,
+        code: process.env.NODE_ENV === 'development' ? code : undefined // Only include code in development
       };
     } catch (error) {
-      console.error('Email sending failed:', error);
-      throw new Error('Failed to send verification email');
+      console.error('❌ Email sending failed:', error);
+      
+      // In development, provide fallback mock functionality
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔧 Email sending failed in development, providing mock response');
+        return {
+          success: true,
+          messageId: 'mock-message-id',
+          code: code,
+          mock: true
+        };
+      }
+      
+      throw new Error(`Failed to send verification email: ${error.message}`);
     }
   }
 
@@ -230,7 +249,7 @@ This email was sent to ${email}
       const mailOptions = {
         from: {
           name: 'NextMind AI',
-          address: process.env.EMAIL_FROM || 'noreply@nextmind-ai.com'
+          address: process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@nextmind-ai.com'
         },
         to: email,
         subject: 'Welcome to NextMind AI! 🎉',
@@ -260,8 +279,9 @@ This email was sent to ${email}
       };
 
       await this.transporter.sendMail(mailOptions);
+      console.log('📧 Welcome email sent successfully to:', email);
     } catch (error) {
-      console.error('Welcome email failed:', error);
+      console.error('❌ Welcome email failed:', error);
       // Don't throw error for welcome email failure
     }
   }
