@@ -29,7 +29,6 @@ const AuthModal: React.FC<AuthModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [pendingUserData, setPendingUserData] = useState<any>(null);
-  const [mockVerificationCode, setMockVerificationCode] = useState<string>('');
   const [timeLeft, setTimeLeft] = useState(900); // 15 minutes
 
   const { login, register } = useAuth();
@@ -84,7 +83,6 @@ const AuthModal: React.FC<AuthModalProps> = ({
       setSuccess(null);
       setShowPassword(false);
       setPendingUserData(null);
-      setMockVerificationCode('');
       setTimeLeft(900);
     }
   }, [isOpen, mode]);
@@ -100,11 +98,11 @@ const AuthModal: React.FC<AuthModalProps> = ({
     setSuccess(null);
 
     try {
+      console.log('📧 Sending verification email to:', formData.email);
       const result = await emailService.sendVerificationEmail(formData.email, formData.name);
       
       if (result.success) {
-        setMockVerificationCode(result.code);
-        setSuccess('Verification email sent! Check the development console for your code.');
+        setSuccess('Verification email sent! Check your inbox and spam folder.');
         
         // Store user data for after verification
         setPendingUserData({
@@ -117,7 +115,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
         setMode('verify-email');
         setTimeLeft(900); // Reset timer
       } else {
-        setError('Failed to send verification email. Please try again.');
+        setError(result.message);
       }
     } catch (error: any) {
       console.error('Verification email error:', error);
@@ -137,8 +135,8 @@ const AuthModal: React.FC<AuthModalProps> = ({
     setError(null);
 
     try {
-      // Use development-friendly verification
-      const result = await emailService.verifyAnyCode(formData.email, verificationCode);
+      console.log('🔍 Verifying code:', verificationCode);
+      const result = await emailService.verifyCode(formData.email, verificationCode);
       
       if (result.success && pendingUserData) {
         // Create the user account
@@ -176,9 +174,10 @@ const AuthModal: React.FC<AuthModalProps> = ({
       try {
         const result = await emailService.sendVerificationEmail(pendingUserData.email, pendingUserData.name);
         if (result.success) {
-          setMockVerificationCode(result.code);
-          setSuccess('New verification code sent! Check the console.');
+          setSuccess('New verification code sent! Check your inbox.');
           setTimeLeft(900);
+        } else {
+          setError(result.message);
         }
       } catch (error) {
         setError('Failed to resend code. Please try again.');
@@ -222,7 +221,6 @@ const AuthModal: React.FC<AuthModalProps> = ({
     setError(null);
     setSuccess(null);
     setPendingUserData(null);
-    setMockVerificationCode('');
     setVerificationCode('');
   };
 
@@ -277,7 +275,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
               </div>
               
               <div className="space-y-6">
-                {/* Development Mode Notice */}
+                {/* Email Sent Notice */}
                 <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
                   <h4 className="text-blue-400 font-medium mb-2">📧 Email Sent!</h4>
                   <p className="text-sm text-gray-300 mb-2">
@@ -287,20 +285,6 @@ const AuthModal: React.FC<AuthModalProps> = ({
                     Check your email inbox and spam folder for the 6-digit code.
                   </p>
                 </div>
-
-                {/* Development Code Display */}
-                {mockVerificationCode && (
-                  <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4">
-                    <h4 className="text-yellow-400 font-medium mb-2">🔧 Development Mode</h4>
-                    <div className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3">
-                      <span className="text-gray-400">Your Code:</span>
-                      <span className="font-mono text-yellow-400 text-lg">{mockVerificationCode}</span>
-                    </div>
-                    <p className="text-xs text-yellow-300 mt-2">
-                      Copy this code or enter any 6-digit number for testing
-                    </p>
-                  </div>
-                )}
 
                 {/* Error/Success Messages */}
                 {error && (
