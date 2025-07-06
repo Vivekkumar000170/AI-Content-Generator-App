@@ -22,7 +22,23 @@ class EmailService {
         }),
       });
 
-      const data = await response.json();
+      // Check if response has JSON content
+      const contentType = response.headers.get('content-type');
+      let data;
+      
+      if (contentType && contentType.includes('application/json')) {
+        try {
+          data = await response.json();
+        } catch (jsonError) {
+          console.error('❌ Failed to parse JSON response:', jsonError);
+          throw new Error('Server returned invalid JSON response');
+        }
+      } else {
+        // Handle non-JSON responses
+        const textResponse = await response.text();
+        console.error('❌ Server returned non-JSON response:', textResponse);
+        throw new Error(`Server error: ${response.status} ${response.statusText}`);
+      }
 
       if (response.ok) {
         console.log('✅ Email sent successfully:', data.messageId);
@@ -63,7 +79,23 @@ class EmailService {
         }),
       });
 
-      const data = await response.json();
+      // Check if response has JSON content
+      const contentType = response.headers.get('content-type');
+      let data;
+      
+      if (contentType && contentType.includes('application/json')) {
+        try {
+          data = await response.json();
+        } catch (jsonError) {
+          console.error('❌ Failed to parse JSON response:', jsonError);
+          throw new Error('Server returned invalid JSON response');
+        }
+      } else {
+        // Handle non-JSON responses
+        const textResponse = await response.text();
+        console.error('❌ Server returned non-JSON response:', textResponse);
+        throw new Error(`Server error: ${response.status} ${response.statusText}`);
+      }
 
       if (response.ok) {
         console.log('✅ Email verified successfully');
