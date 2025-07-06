@@ -1,6 +1,6 @@
 // Enhanced email service with better error handling
 class EmailService {
-  private readonly API_BASE = '/api/email-verification';
+  private readonly API_BASE = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/email-verification`;
 
   async sendVerificationEmail(email: string, userName: string = ''): Promise<{
     success: boolean;
