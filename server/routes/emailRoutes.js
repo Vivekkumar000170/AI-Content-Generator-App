@@ -1,6 +1,6 @@
 import express from 'express';
-import nodemailer from 'nodemailer';
 import rateLimit from 'express-rate-limit';
+import emailService from '../services/emailService.js';
 
 const router = express.Router();
 
@@ -36,15 +36,6 @@ router.post('/send-verification', emailLimiter, async (req, res) => {
       code,
       timestamp: Date.now(),
       attempts: 0
-    });
-
-    // Create Gmail transporter with your app password
-    const transporter = nodemailer.createTransporter({
-      service: 'gmail',
-      auth: {
-        user: 'blackrolex1144@gmail.com',
-        pass: 'fzag qdnv dtpk qxal'
-      }
     });
 
     // Email template
@@ -130,7 +121,7 @@ router.post('/send-verification', emailLimiter, async (req, res) => {
     const mailOptions = {
       from: {
         name: 'NextMind AI',
-        address: 'blackrolex1144@gmail.com'
+        address: process.env.EMAIL_FROM || 'blackrolex1144@gmail.com'
       },
       to: email,
       subject: '🤖 Verify Your Email Address - NextMind AI',
@@ -156,8 +147,8 @@ This email was sent to ${email}
       `
     };
 
-    // Send email
-    const result = await transporter.sendMail(mailOptions);
+    // Send email using the shared email service
+    const result = await emailService.transporter.sendMail(mailOptions);
     
     console.log('✅ Email sent successfully:', result.messageId);
     console.log('📧 Verification code for', email, ':', code);
