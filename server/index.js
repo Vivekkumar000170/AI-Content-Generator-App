@@ -8,7 +8,6 @@ import contentRoutes from './routes/content.js';
 import userRoutes from './routes/user.js';
 import analyticsRoutes from './routes/analytics.js';
 import emailVerificationRoutes from './routes/emailVerification.js';
-import emailRoutes from './routes/emailRoutes.js';
 
 dotenv.config();
 
@@ -39,7 +38,6 @@ app.use('/api/content', contentRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/email-verification', emailVerificationRoutes);
-app.use('/api/email', emailRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

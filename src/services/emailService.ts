@@ -1,6 +1,6 @@
 // Enhanced email service with real Gmail integration
 class EmailService {
-  private readonly API_BASE = '/api/email';
+  private readonly API_BASE = '/api/email-verification';
 
   async sendVerificationEmail(email: string, userName: string = ''): Promise<{
     success: boolean;
@@ -11,7 +11,7 @@ class EmailService {
     try {
       console.log('🚀 Sending verification email to:', email);
       
-      const response = await fetch(`${this.API_BASE}/send-verification`, {
+      const response = await fetch(`${this.API_BASE}/send`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -68,7 +68,7 @@ class EmailService {
     try {
       console.log('🔍 Verifying code for:', email);
       
-      const response = await fetch(`${this.API_BASE}/verify-code`, {
+      const response = await fetch(`${this.API_BASE}/verify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
