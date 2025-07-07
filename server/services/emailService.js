@@ -7,41 +7,16 @@ class EmailService {
   }
 
   createTransporter() {
-    // Check if we have Gmail credentials
-    if (process.env.EMAIL_SERVICE === 'gmail' && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+    // Check if we have SMTP credentials
+    if (process.env.SMTP_HOST && process.env.SMTP_MAIL && process.env.SMTP_PASSWORD) {
       console.log('📧 Using Gmail SMTP for email sending');
       return nodemailer.createTransporter({
-        service: 'gmail',
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT) || 465,
+        secure: true, // true for 465, false for other ports
         auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS // Use App Password for Gmail
-        }
-      });
-    }
-
-    // SendGrid SMTP
-    if (process.env.EMAIL_SERVICE === 'sendgrid' && process.env.SENDGRID_API_KEY) {
-      console.log('📧 Using SendGrid SMTP for email sending');
-      return nodemailer.createTransporter({
-        host: 'smtp.sendgrid.net',
-        port: 587,
-        auth: {
-          user: 'apikey',
-          pass: process.env.SENDGRID_API_KEY
-        }
-      });
-    }
-
-    // AWS SES
-    if (process.env.EMAIL_SERVICE === 'ses' && process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
-      console.log('📧 Using AWS SES for email sending');
-      return nodemailer.createTransporter({
-        SES: {
-          aws: {
-            accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-            region: process.env.AWS_REGION || 'us-east-1'
-          }
+          user: process.env.SMTP_MAIL,
+          pass: process.env.SMTP_PASSWORD
         }
       });
     }
@@ -69,7 +44,7 @@ class EmailService {
       const mailOptions = {
         from: {
           name: 'NextMind AI',
-          address: process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@nextmind-ai.com'
+          address: process.env.EMAIL_FROM || process.env.SMTP_MAIL || 'noreply@nextmind-ai.com'
         },
         to: email,
         subject: 'Verify Your Email Address - NextMind AI',
@@ -247,7 +222,7 @@ This email was sent to ${email}
       const mailOptions = {
         from: {
           name: 'NextMind AI',
-          address: process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@nextmind-ai.com'
+          address: process.env.EMAIL_FROM || process.env.SMTP_MAIL || 'noreply@nextmind-ai.com'
         },
         to: email,
         subject: 'Welcome to NextMind AI! 🎉',
