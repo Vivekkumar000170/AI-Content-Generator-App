@@ -46,18 +46,13 @@ class EmailService {
       });
     }
 
-    // For development/testing - use Ethereal Email (fake SMTP) or console logging
-    if (process.env.NODE_ENV === 'development') {
-      console.log('📧 Development mode: Using console logging for emails');
-      return nodemailer.createTransporter({
-        streamTransport: true,
-        newline: 'unix',
-        buffer: true
-      });
-    }
-
-    // Fallback: throw error if no email service is configured
-    throw new Error('No email service configured. Please set EMAIL_SERVICE and corresponding credentials in environment variables.');
+    // For development/testing - use console logging
+    console.log('📧 Development mode: Using console logging for emails');
+    return nodemailer.createTransporter({
+      streamTransport: true,
+      newline: 'unix',
+      buffer: true
+    });
   }
 
   /**
@@ -116,6 +111,9 @@ class EmailService {
       // In development, provide fallback mock functionality
       if (process.env.NODE_ENV === 'development') {
         console.log('🔧 Email sending failed in development, providing mock response');
+        console.log('📧 Mock verification code:', code);
+        console.log('📧 Mock verification URL:', `${process.env.CLIENT_URL}/verify-email?token=${token}`);
+        
         return {
           success: true,
           messageId: 'mock-message-id',

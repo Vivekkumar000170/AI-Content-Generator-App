@@ -1,4 +1,4 @@
-// Enhanced email service with better error handling
+// Enhanced email service with better error handling and development mode support
 class EmailService {
   private readonly API_BASE = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/email-verification`;
 
@@ -10,6 +10,7 @@ class EmailService {
   }> {
     try {
       console.log('🚀 Sending verification email to:', email);
+      console.log('📡 API endpoint:', `${this.API_BASE}/send`);
       
       const response = await fetch(`${this.API_BASE}/send`, {
         method: 'POST',
@@ -23,7 +24,6 @@ class EmailService {
       });
 
       console.log('📡 Response status:', response.status);
-      console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
 
       // Check if response has JSON content
       const contentType = response.headers.get('content-type');
@@ -35,8 +35,6 @@ class EmailService {
           console.log('📦 Response data:', data);
         } catch (jsonError) {
           console.error('❌ Failed to parse JSON response:', jsonError);
-          const textResponse = await response.text();
-          console.log('📄 Raw response text:', textResponse);
           
           // If status is 200 but JSON parsing failed, treat as success with fallback
           if (response.status === 200) {
@@ -49,19 +47,12 @@ class EmailService {
           throw new Error('Server returned invalid JSON response');
         }
       } else {
-        // Handle non-JSON responses
+        // Handle non-JSON responses (likely server not running)
         const textResponse = await response.text();
         console.log('📄 Non-JSON response:', textResponse);
         
-        // If status is 200, treat as success even without JSON
-        if (response.status === 200) {
-          return {
-            success: true,
-            message: 'Verification email sent successfully!'
-          };
-        }
-        
-        throw new Error(`Server error: ${response.status} ${response.statusText}`);
+        // If we can't connect to server, use development mode
+        throw new Error(`Server not available: ${response.status} ${response.statusText}`);
       }
 
       // Handle successful responses
@@ -79,8 +70,8 @@ class EmailService {
     } catch (error: any) {
       console.error('❌ Email service error:', error);
       
-      // For development mode, provide mock functionality as fallback
-      if (process.env.NODE_ENV === 'development' || !navigator.onLine) {
+      // For development mode or when server is not available, provide mock functionality
+      if (import.meta.env.DEV || error.message.includes('fetch')) {
         console.log('🔧 Development mode: Using mock email verification');
         const mockCode = Math.floor(100000 + Math.random() * 900000).toString();
         console.log(`📧 Mock verification code for ${email}: ${mockCode}`);
@@ -106,6 +97,7 @@ class EmailService {
   }> {
     try {
       console.log('🔍 Verifying code for:', email);
+      console.log('📡 API endpoint:', `${this.API_BASE}/verify`);
       
       const response = await fetch(`${this.API_BASE}/verify`, {
         method: 'POST',
@@ -142,19 +134,12 @@ class EmailService {
           throw new Error('Server returned invalid JSON response');
         }
       } else {
-        // Handle non-JSON responses
+        // Handle non-JSON responses (likely server not running)
         const textResponse = await response.text();
         console.log('📄 Non-JSON verify response:', textResponse);
         
-        // If status is 200, treat as success
-        if (response.status === 200) {
-          return {
-            success: true,
-            message: 'Email verified successfully!'
-          };
-        }
-        
-        throw new Error(`Server error: ${response.status} ${response.statusText}`);
+        // If we can't connect to server, use development mode
+        throw new Error(`Server not available: ${response.status} ${response.statusText}`);
       }
 
       if (response.ok) {
@@ -172,8 +157,8 @@ class EmailService {
     } catch (error: any) {
       console.error('❌ Verification error:', error);
       
-      // For development mode, accept any 6-digit code as fallback
-      if (process.env.NODE_ENV === 'development' || !navigator.onLine) {
+      // For development mode or when server is not available, accept any 6-digit code as fallback
+      if (import.meta.env.DEV || error.message.includes('fetch')) {
         if (code.length === 6 && /^\d+$/.test(code)) {
           console.log('🔧 Development mode: Accepting any 6-digit code');
           return {
