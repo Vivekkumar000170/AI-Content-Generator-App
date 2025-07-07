@@ -1,6 +1,10 @@
+import dotenv from 'dotenv';
+
+// Load environment variables FIRST, before any other imports
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import { connectDB } from './config/database.js';
 import authRoutes from './routes/auth.js';
@@ -8,8 +12,6 @@ import contentRoutes from './routes/content.js';
 import userRoutes from './routes/user.js';
 import analyticsRoutes from './routes/analytics.js';
 import emailVerificationRoutes from './routes/emailVerification.js';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
