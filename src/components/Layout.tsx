@@ -70,8 +70,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center space-x-3 hover:scale-105 transition-transform duration-300">
               <div className="relative">
-                <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-3 rounded-xl shadow-lg backdrop-blur-xl">
-                  <Bot className="w-8 h-8 text-white" />
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-xl shadow-lg backdrop-blur-xl overflow-hidden">
+                  <img 
+                    src="/ChatGPT Image Jul 6, 2025, 12_52_33 AM.png" 
+                    alt="NextMind AI Logo" 
+                    className="w-10 h-10 object-contain"
+                  />
                 </div>
                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full animate-ping"></div>
                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full"></div>
@@ -253,8 +257,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div className="grid md:grid-cols-4 gap-8">
             <div className="col-span-2">
               <div className="flex items-center space-x-3 mb-6">
-                <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-xl shadow-lg backdrop-blur-xl">
-                  <Bot className="w-6 h-6 text-white" />
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-xl shadow-lg backdrop-blur-xl overflow-hidden">
+                  <img 
+                    src="/ChatGPT Image Jul 6, 2025, 12_52_33 AM.png" 
+                    alt="NextMind AI Logo" 
+                    className="w-6 h-6 object-contain"
+                  />
                 </div>
                 <h3 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                   NextMind AI
