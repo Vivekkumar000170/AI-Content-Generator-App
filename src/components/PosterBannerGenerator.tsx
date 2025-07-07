@@ -328,7 +328,7 @@ const PosterBannerGenerator = () => {
                 ) : (
                   <>
                     <Sparkles className="w-6 h-6" />
-                    <span>Generate AI {config.type}</span>
+                    <span>Generate with Gemini AI</span>
                   </>
                 )}
               </button>
@@ -344,8 +344,8 @@ const PosterBannerGenerator = () => {
                     <div className="flex items-center space-x-3">
                       <Image className="w-5 h-5 text-purple-400" />
                       <div>
-                        <h3 className="text-lg font-semibold text-white">Generated {config.type}</h3>
-                        <p className="text-sm text-gray-400">AI-created design ready for use</p>
+                        <h3 className="text-lg font-semibold text-white">Gemini AI Enhanced {config.type}</h3>
+                        <p className="text-sm text-gray-400">Google Gemini optimized design ready for use</p>
                       </div>
                     </div>
                     <button
@@ -373,7 +373,7 @@ const PosterBannerGenerator = () => {
                       <strong>Style:</strong> {config.style} • <strong>Colors:</strong> {config.colorScheme}
                     </p>
                     <p className="text-xs text-gray-500">
-                      <strong>AI Prompt:</strong> {generatedImage.prompt.substring(0, 150)}...
+                      <strong>Gemini Enhanced:</strong> {generatedImage.prompt.substring(0, 150)}...
                     </p>
                   </div>
                 </div>
@@ -386,10 +386,10 @@ const PosterBannerGenerator = () => {
                     <Sparkles className="w-3 h-3 text-white" />
                   </div>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-400 mb-3">Ready to Create</h3>
+                  <span className="text-green-400 font-medium">Google Gemini AI Enhanced</span>
                 <p className="text-gray-500 max-w-md mx-auto">
                   Configure your {config.type} settings and click "Generate AI {config.type}" to create 
-                  a professional design powered by artificial intelligence.
+                  a professional design enhanced by Google Gemini AI.
                 </p>
               </div>
             )}
