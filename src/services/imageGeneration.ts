@@ -1,10 +1,23 @@
 import OpenAI from 'openai';
 import { ContentType } from '../types';
 
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true
-});
+// Lazy initialization of OpenAI client
+let openaiClient: OpenAI | null = null;
+
+const getOpenAIClient = (): OpenAI => {
+  if (!openaiClient) {
+    if (!import.meta.env.VITE_OPENAI_API_KEY) {
+      throw new Error('OpenAI API key is not configured. Please add VITE_OPENAI_API_KEY to your environment variables.');
+    }
+    
+    openaiClient = new OpenAI({
+      apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+      dangerouslyAllowBrowser: true
+    });
+  }
+  
+  return openaiClient;
+};
 
 export interface GeneratedImage {
   url: string;
@@ -24,6 +37,7 @@ export const generateImage = async (
       return getFallbackImage(contentType, topic);
     }
 
+    const openai = getOpenAIClient();
     const imagePrompt = buildImagePrompt(contentType, topic, platform, tone);
     
     const response = await openai.images.generate({

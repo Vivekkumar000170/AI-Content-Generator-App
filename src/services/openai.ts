@@ -1,10 +1,23 @@
 import OpenAI from 'openai';
 import { ContentRequest } from '../types';
 
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true
-});
+// Lazy initialization of OpenAI client
+let openaiClient: OpenAI | null = null;
+
+const getOpenAIClient = (): OpenAI => {
+  if (!openaiClient) {
+    if (!import.meta.env.VITE_OPENAI_API_KEY) {
+      throw new Error('OpenAI API key is not configured. Please add VITE_OPENAI_API_KEY to your environment variables.');
+    }
+    
+    openaiClient = new OpenAI({
+      apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+      dangerouslyAllowBrowser: true
+    });
+  }
+  
+  return openaiClient;
+};
 
 export const generateAIContent = async (request: ContentRequest): Promise<string> => {
   try {
@@ -13,6 +26,7 @@ export const generateAIContent = async (request: ContentRequest): Promise<string
       throw new Error('OpenAI API key is not configured. Please add VITE_OPENAI_API_KEY to your environment variables.');
     }
 
+    const openai = getOpenAIClient();
     const prompt = buildPrompt(request);
     
     const completion = await openai.chat.completions.create({
