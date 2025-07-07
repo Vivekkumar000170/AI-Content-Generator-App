@@ -6,12 +6,14 @@ let openaiClient: OpenAI | null = null;
 
 const getOpenAIClient = (): OpenAI => {
   if (!openaiClient) {
-    if (!import.meta.env.VITE_OPENAI_API_KEY) {
-      throw new Error('OpenAI API key is not configured. Please add VITE_OPENAI_API_KEY to your environment variables.');
+    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+    
+    if (!apiKey || apiKey === 'your-openai-api-key-here') {
+      throw new Error('OpenAI API key is not configured. Please add your actual OpenAI API key to the VITE_OPENAI_API_KEY environment variable in your .env file.');
     }
     
     openaiClient = new OpenAI({
-      apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+      apiKey: apiKey,
       dangerouslyAllowBrowser: true
     });
   }
@@ -21,9 +23,10 @@ const getOpenAIClient = (): OpenAI => {
 
 export const generateAIContent = async (request: ContentRequest): Promise<string> => {
   try {
-    // Check if API key is configured
-    if (!import.meta.env.VITE_OPENAI_API_KEY) {
-      throw new Error('OpenAI API key is not configured. Please add VITE_OPENAI_API_KEY to your environment variables.');
+    // Check if API key is configured before creating client
+    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+    if (!apiKey || apiKey === 'your-openai-api-key-here') {
+      throw new Error('OpenAI API key is not configured. Please add your actual OpenAI API key to the VITE_OPENAI_API_KEY environment variable in your .env file.');
     }
 
     const openai = getOpenAIClient();
