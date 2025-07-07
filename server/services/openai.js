@@ -1,21 +1,32 @@
 import OpenAI from 'openai';
 
-// Initialize OpenAI with environment variable
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+// Don't initialize OpenAI immediately - wait until we have a valid API key
+let openai = null;
+
+const getOpenAIInstance = (apiKey = null) => {
+  const keyToUse = apiKey || process.env.OPENAI_API_KEY;
+  
+  if (!keyToUse) {
+    throw new Error('OpenAI API key is not configured. Please add your API key.');
+  }
+  
+  // If using user's API key, create a new instance
+  if (apiKey) {
+    return new OpenAI({ apiKey });
+  }
+  
+  // For server's API key, reuse the instance if already created
+  if (!openai) {
+    openai = new OpenAI({ apiKey: keyToUse });
+  }
+  
+  return openai;
+};
 
 export const generateAIContent = async (request, userApiKey = null) => {
   try {
-    // Use user's API key if provided, otherwise use server's
-    const apiKey = userApiKey || process.env.OPENAI_API_KEY;
-    
-    if (!apiKey) {
-      throw new Error('OpenAI API key is not configured. Please add your API key.');
-    }
-
-    // Create OpenAI instance with appropriate API key
-    const openaiInstance = userApiKey ? new OpenAI({ apiKey: userApiKey }) : openai;
+    // Get OpenAI instance with appropriate API key
+    const openaiInstance = getOpenAIInstance(userApiKey);
 
     const prompt = buildPrompt(request);
     
