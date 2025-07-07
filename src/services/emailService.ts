@@ -12,16 +12,31 @@ class EmailService {
       console.log('🚀 Sending verification email to:', email);
       console.log('📡 API endpoint:', `${this.API_BASE}/send`);
       
-      const response = await fetch(`${this.API_BASE}/send`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email.trim(),
-          userName: userName.trim()
-        }),
-      });
+      // Try to connect to the backend server
+      let response;
+      try {
+        response = await fetch(`${this.API_BASE}/send`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: email.trim(),
+            userName: userName.trim()
+          }),
+        });
+      } catch (fetchError) {
+        console.warn('❌ Backend server not available, using development mode');
+        // Immediately fall back to development mode
+        const mockCode = Math.floor(100000 + Math.random() * 900000).toString();
+        console.log(`📧 Development Mode - Verification code for ${email}: ${mockCode}`);
+        
+        return {
+          success: true,
+          message: `Development Mode: Verification code is ${mockCode} (check console)`,
+          code: mockCode
+        };
+      }
 
       console.log('📡 Response status:', response.status);
 
