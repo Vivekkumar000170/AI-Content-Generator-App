@@ -12,6 +12,7 @@ import contentRoutes from './routes/content.js';
 import userRoutes from './routes/user.js';
 import analyticsRoutes from './routes/analytics.js';
 import emailVerificationRoutes from './routes/emailVerification.js';
+import adminRoutes from './routes/admin/index.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -40,6 +41,7 @@ app.use('/api/content', contentRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/email-verification', emailVerificationRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

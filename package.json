@@ -12,21 +12,26 @@
     "server:dev": "cd server && nodemon index.js"
   },
   "dependencies": {
+    "axios": "^1.7.9",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.4.1",
+    "express-session": "^1.18.1",
+    "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.468.0",
+    "mongoose": "^8.9.3",
+    "multer": "^2.0.1",
+    "nodemailer": "^6.9.18",
+    "openai": "^4.73.1",
+    "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0",
-    "lucide-react": "^0.468.0",
-    "axios": "^1.7.9",
-    "openai": "^4.73.1",
-    "express": "^4.21.2",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "express-rate-limit": "^7.4.1",
-    "mongoose": "^8.9.3",
-    "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^9.0.2",
-    "nodemailer": "^6.9.18",
-    "crypto": "^1.0.1"
+    "sharp": "^0.34.2",
+    "speakeasy": "^2.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
@@ -38,10 +43,10 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14",
     "globals": "^15.12.0",
+    "nodemon": "^3.1.9",
     "postcss": "^8.5.1",
     "tailwindcss": "^3.4.17",
     "typescript": "~5.6.2",
-    "vite": "^6.0.1",
-    "nodemon": "^3.1.9"
+    "vite": "^6.0.1"
   }
 }
