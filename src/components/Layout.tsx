@@ -254,7 +254,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Enhanced Footer with Glass Morphism */}
       <footer className="relative z-10 bg-gray-900/60 backdrop-blur-3xl border-t border-white/10 mt-20 shadow-2xl">
         <div className="max-w-7xl mx-auto px-4 py-12">
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-4 gap-8 mb-12">
             <div className="col-span-2">
               <div className="flex items-center space-x-3 mb-6">
                 <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-xl shadow-lg backdrop-blur-xl overflow-hidden">
@@ -306,6 +306,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
           </div>
           
+          {/* Newsletter Subscription Section */}
+          <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-2xl p-8 mb-12">
+            <div className="max-w-2xl mx-auto text-center">
+              <h3 className="text-2xl font-bold text-white mb-4">Stay Updated with NextMind AI</h3>
+              <p className="text-gray-400 mb-6">
+                Get the latest AI insights, product updates, and exclusive content delivered to your inbox. 
+                Join thousands of professionals already subscribed.
+              </p>
+              
+              <NewsletterSubscription />
+            </div>
+          </div>
+          
           <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
               © 2025 NextMind AI. All rights reserved. Powered by advanced AI technology.
@@ -324,6 +337,114 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         onClose={() => setIsAuthModalOpen(false)}
         initialMode="register"
       />
+    </div>
+  );
+};
+
+// Newsletter Subscription Component
+const NewsletterSubscription = () => {
+  const [email, setEmail] = useState('');
+  const [consent, setConsent] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email.trim()) {
+      setMessage({ type: 'error', text: 'Please enter your email address.' });
+      return;
+    }
+    
+    if (!consent) {
+      setMessage({ type: 'error', text: 'Please agree to receive our newsletter.' });
+      return;
+    }
+
+    setIsLoading(true);
+    setMessage(null);
+
+    try {
+      // Simulate API call for newsletter subscription
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setMessage({ 
+        type: 'success', 
+        text: 'Thank you for subscribing! Check your email for confirmation.' 
+      });
+      setEmail('');
+      setConsent(false);
+    } catch (error) {
+      setMessage({ 
+        type: 'error', 
+        text: 'Failed to subscribe. Please try again later.' 
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="w-full max-w-md mx-auto">
+      {message && (
+        <div className={`mb-4 p-3 rounded-lg text-sm ${
+          message.type === 'success' 
+            ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+            : 'bg-red-500/20 text-red-400 border border-red-500/30'
+        }`}>
+          {message.text}
+        </div>
+      )}
+      
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex-1">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email address"
+              className="w-full px-4 py-3 bg-gray-800/50 backdrop-blur-xl border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-white placeholder-gray-400"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl font-semibold text-white hover:shadow-lg hover:shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:scale-105 whitespace-nowrap"
+          >
+            {isLoading ? (
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <span>Subscribing...</span>
+              </div>
+            ) : (
+              'Subscribe'
+            )}
+          </button>
+        </div>
+        
+        <div className="flex items-start space-x-3 text-left">
+          <input
+            type="checkbox"
+            id="newsletter-consent"
+            checked={consent}
+            onChange={(e) => setConsent(e.target.checked)}
+            className="mt-1 w-4 h-4 text-blue-600 bg-gray-800 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+            required
+          />
+          <label htmlFor="newsletter-consent" className="text-xs text-gray-400 leading-relaxed">
+            I agree to receive newsletters, product updates, and promotional emails from NextMind AI. 
+            You can unsubscribe at any time. By subscribing, you agree to our{' '}
+            <a href="#" className="text-blue-400 hover:text-blue-300 underline">Privacy Policy</a> and{' '}
+            <a href="#" className="text-blue-400 hover:text-blue-300 underline">Terms of Service</a>.
+          </label>
+        </div>
+      </form>
+      
+      <div className="mt-4 text-xs text-gray-500 text-center">
+        🔒 Your email is secure and will never be shared with third parties.
+      </div>
     </div>
   );
 };

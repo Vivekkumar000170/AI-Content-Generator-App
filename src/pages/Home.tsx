@@ -16,7 +16,6 @@ const Home = () => {
       <div id="poster-banner-generator">
         <PosterBannerGenerator />
       </div>
-      <EmailVerificationDemo />
     </>
   );
 };
